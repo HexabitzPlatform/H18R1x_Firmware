@@ -103,6 +103,22 @@
 
 #define NUM_MODULE_PARAMS						1
 
+/*  Pins For H_Bridge*/
+#define IN1_Pin                               GPIO_PIN_7
+#define IN1_GPIO_Port 						  GPIOA
+
+#define IN2_Pin                               GPIO_PIN_1
+#define IN2_GPIO_Port                         GPIOB
+
+#define IN3_Pin                               GPIO_PIN_4
+#define IN3_GPIO_Port                         GPIOA
+
+#define IN4_Pin                               GPIO_PIN_6
+#define IN4_GPIO_Port                         GPIOA
+
+
+
+
 /* Module EEPROM Variables */
 
 // Module Addressing Space 500 - 599

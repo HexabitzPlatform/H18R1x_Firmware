@@ -301,6 +301,11 @@ void Module_Peripheral_Init(void){
 	MX_USART6_UART_Init();
 
 
+
+	/*H_Bridge GPIO Init: */
+	H_Bridge_gpio_init;
+
+
 	/* Create module special task (if needed) */
 }
 

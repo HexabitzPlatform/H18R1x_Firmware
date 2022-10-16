@@ -41,6 +41,37 @@ void IND_LED_Init(void){
 	HAL_GPIO_Init(_IND_LED_PORT,&GPIO_InitStruct);
 }
 
+//H_Bridge GPIO Init:
+void H_Bridge_gpio_init(void){
+	 GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+	 /* GPIO Ports Clock Enable */
+	   __HAL_RCC_GPIOF_CLK_ENABLE();
+	   __HAL_RCC_GPIOA_CLK_ENABLE();
+	   __HAL_RCC_GPIOB_CLK_ENABLE();
+
+	   /*Configure GPIO pin Output Level */
+	   HAL_GPIO_WritePin(GPIOA, IN3_Pin|IN4_Pin|IN1_Pin, GPIO_PIN_RESET);
+
+	   /*Configure GPIO pin Output Level */
+	   HAL_GPIO_WritePin(IN2_GPIO_Port, IN2_Pin, GPIO_PIN_RESET);
+
+	   /*Configure GPIO pins : IN3_Pin IN4_Pin IN1_Pin */
+	   GPIO_InitStruct.Pin = IN3_Pin|IN4_Pin|IN1_Pin;
+	   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	   GPIO_InitStruct.Pull = GPIO_NOPULL;
+	   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	   /*Configure GPIO pin : IN2_Pin */
+	   GPIO_InitStruct.Pin = IN2_Pin;
+	   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	   GPIO_InitStruct.Pull = GPIO_NOPULL;
+	   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	   HAL_GPIO_Init(IN2_GPIO_Port, &GPIO_InitStruct);
+
+
+}
 /*-----------------------------------------------------------*/
 
 /* --- Check for factory reset condition: 
