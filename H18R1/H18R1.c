@@ -35,6 +35,8 @@ module_param_t modParam[NUM_MODULE_PARAMS] ={{.paramPtr = NULL, .paramFormat =FM
 
 
 /* Private function prototypes -----------------------------------------------*/
+void MX_TIM2_Init(void);
+void MX_TIM3_Init(void);
 void ExecuteMonitor(void);
 
 /* Create CLI commands --------------------------------------------------------*/
@@ -304,6 +306,10 @@ void Module_Peripheral_Init(void){
 
 	/*H_Bridge GPIO Init: */
 	H_Bridge_gpio_init;
+
+	/*init timers for pwm*/
+	 MX_TIM2_Init();
+	 MX_TIM3_Init();
 
 
 	/* Create module special task (if needed) */

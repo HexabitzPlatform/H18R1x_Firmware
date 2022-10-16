@@ -22,6 +22,7 @@
 extern void GPIO_Init(void);
 extern void IND_LED_Init(void);
 extern void H_Bridge_gpio_init(void);
+extern void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 #ifdef __cplusplus
 }

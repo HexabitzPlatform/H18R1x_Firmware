@@ -116,8 +116,11 @@
 #define IN4_Pin                               GPIO_PIN_6
 #define IN4_GPIO_Port                         GPIOA
 
+#define TIM2_CH1_ENB_Pin                      GPIO_PIN_5
+#define TIM2_CH1_ENB_GPIO_Port                GPIOA
 
-
+#define TIM3_CH3_ENA_Pin                      GPIO_PIN_0
+#define TIM3_CH3_ENA_GPIO_Port                GPIOB
 
 /* Module EEPROM Variables */
 
