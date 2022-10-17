@@ -14,6 +14,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "BOS.h"
+#include "H18R1.h"
 
 /*----------------------------------------------------------------------------*/
 /* Configure Timers                                                              */
@@ -25,9 +26,9 @@ TIM_HandleTypeDef htim16; /* micro-second delay counter */
 //TIM_HandleTypeDef htim15; /* milli-second delay counter */
 TIM_HandleTypeDef htim17; /* milli-second delay counter */
 
-/*Timer for PWM*/
-TIM_HandleTypeDef htim2;
-TIM_HandleTypeDef htim3;
+///*Timer for PWM*/
+//TIM_HandleTypeDef htim2;
+//TIM_HandleTypeDef htim3;
 /*  Micro-seconds timebase init function - TIM14 (16-bit)
  */
 void TIM_USEC_Init(void){

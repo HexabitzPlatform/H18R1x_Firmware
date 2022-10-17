@@ -7,9 +7,9 @@
  	 	 	 	 (Description_of_module)
 
 (Description of Special module peripheral configuration):
->>
->>
->>
+
+>> USARTs 1,2,3,5,6 for module ports.
+>> Timer2 (Ch1) & Timer3 (Ch3) for L298 PWM.
 
  */
 
@@ -32,7 +32,11 @@ module_param_t modParam[NUM_MODULE_PARAMS] ={{.paramPtr = NULL, .paramFormat =FM
 
 /* Private variables ---------------------------------------------------------*/
 
+/*Timer for PWM*/
+TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 
+H_BridgeMode Mode=stop;
 /* Private function prototypes -----------------------------------------------*/
 void MX_TIM2_Init(void);
 void MX_TIM3_Init(void);
@@ -381,9 +385,103 @@ void RegisterModuleCLICommands(void){
 
 
 /*-----------------------------------------------------------*/
+H_BridgeMode MotorON(){
+
+	H_BridgeMode status=H18R1_OK;
+
+	HAL_GPIO_WritePin(TIM3_CH3_ENA_GPIO_Port ,TIM3_CH3_ENA_Pin ,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(TIM2_CH1_ENB_GPIO_Port ,TIM2_CH1_ENB_Pin ,GPIO_PIN_SET);
+
+	return status;
+
+}
+/*-----------------------------------------------------------*/
+H_BridgeMode SetupMotor(uint8_t MovementDirection){
+
+	H_BridgeMode status=H18R1_OK;
+
+	MotorON();
+	switch (MovementDirection){
+	case forward:
+	HAL_GPIO_WritePin(IN1_GPIO_Port ,IN1_Pin ,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(IN3_GPIO_Port ,IN3_Pin ,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_RESET);
+	break;
+	case backward:
+	HAL_GPIO_WritePin(IN1_GPIO_Port ,IN1_Pin ,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(IN3_GPIO_Port ,IN3_Pin ,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_SET);
+	break;
+
+	default: break;
 
 
+	}
+	return status;
+}
+/*-----------------------------------------------------------*/
+H_BridgeMode MotorOFF(){
 
+	H_BridgeMode status=H18R1_OK;
+
+	HAL_GPIO_WritePin(TIM3_CH3_ENA_GPIO_Port ,TIM3_CH3_ENA_Pin ,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(TIM2_CH1_ENB_GPIO_Port ,TIM2_CH1_ENB_Pin ,GPIO_PIN_RESET);
+
+	return status;
+
+}
+/*-----------------------------------------------------------*/
+H_BridgeMode PWM_stop(){
+
+	H_BridgeMode status=H18R1_OK;
+
+	HAL_TIM_Base_DeInit(&htim2);
+	HAL_TIM_Base_DeInit(&htim3);
+
+	HAL_TIM_PWM_DeInit(&htim2);
+	HAL_TIM_PWM_DeInit(&htim3);
+
+	HAL_TIM_Base_MspDeInit(&htim2);
+	HAL_TIM_Base_MspDeInit(&htim3);
+
+	return status;
+
+
+}
+/*-----------------------------------------------------------*/
+
+/* --- Set Motor PWM frequency and dutycycle ---*/
+H_BridgeMode MotorPWM(uint32_t freq, uint8_t dutycycle) {
+
+	H_BridgeMode status=H18R1_OK;
+
+	uint32_t period = PWM_TIMER_CLOCK / freq;
+
+	if(Mode!=pwm)
+	{
+		MX_TIM2_Init();
+		MX_TIM3_Init();
+
+	}
+
+
+	/* PWM period */
+	htim2.Instance->ARR = period - 1;
+	htim3.Instance->ARR = period - 1;
+
+	/* PWM duty cycle */
+	htim2.Instance->CCR1 = ((float) dutycycle / 100.0f) * period;
+	htim3.Instance->CCR3 = ((float) dutycycle / 100.0f) * period;
+
+	if (HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1 ) != HAL_OK)
+		return H18R1_ERROR;
+	if (HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_3 ) != HAL_OK)
+		return H18R1_ERROR;
+
+	return status;
+}
 /*-----------------------------------------------------------*/
 
 /* -----------------------------------------------------------------------
@@ -391,6 +489,57 @@ void RegisterModuleCLICommands(void){
 /* -----------------------------------------------------------------------
  */
 
+/*--------------Run the motor at full speed------------*/
+Module_Status Turn_ON(uint8_t direction){
+
+     Module_Status status=H18R1_OK;
+
+     if(Mode==pwm)
+     {
+    	 PWM_stop();
+     }
+
+	 SetupMotor(direction);
+	 Mode=direction;
+
+	 return status;
+
+}
+
+/*-----------------------------------------------------------------------------*/
+/*------------------Off the motor---------------*/
+Module_Status Turn_OFF(){
+
+    Module_Status status=H18R1_OK;
+
+    if(Mode==pwm)
+    {
+        PWM_stop();
+    }
+    MotorOFF();
+    Mode=stop;
+
+	return status;
+}
+/*-----------------------------------------------------------------------------*/
+/* --- Turn-on H_Bridge with pulse-width modulation (PWM) ---
+ dutyCycle: PWM duty cycle in precentage (0 to 100)
+ */
+Module_Status Turn_PWM(uint8_t direction,uint8_t dutyCycle){
+
+    Module_Status status=H18R1_OK;
+
+    if (dutyCycle < 0 || dutyCycle > 100)
+       return H18R1_ERR_WrongParams;
+
+	SetupMotor(direction);
+	MotorPWM(H_Bridge_PWM_FREQ, dutyCycle);
+	Mode=pwm;
+
+
+
+	return status;
+}
 
 /*-----------------------------------------------------------*/
 

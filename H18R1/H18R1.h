@@ -7,9 +7,9 @@
  	 	 	 	 (Description_of_module)
 
 (Description of Special module peripheral configuration):
->>
->>
->>
+
+>> USARTs 1,2,3,5,6 for module ports.
+>> Timer2 (Ch1) & Timer3 (Ch3) for L298 PWM.
 
  */
 
@@ -116,6 +116,12 @@
 #define TIM3_CH3_ENA_Pin                      GPIO_PIN_0
 #define TIM3_CH3_ENA_GPIO_Port                GPIOB
 
+
+#define PWM_TIMER_CLOCK							16000000
+#define H_Bridge_PWM_FREQ						40000
+
+
+
 /* Module EEPROM Variables */
 
 // Module Addressing Space 500 - 599
@@ -129,6 +135,13 @@ typedef enum {
 	H18R1_ERROR =255
 } Module_Status;
 
+typedef enum {
+	forward=1,
+	backward,
+	pwm,
+	stop
+} H_BridgeMode;
+
 /* Indicator LED */
 #define _IND_LED_PORT			GPIOB
 #define _IND_LED_PIN			GPIO_PIN_7
@@ -140,6 +153,10 @@ extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart5;
 extern UART_HandleTypeDef huart6;
 
+/*Timer for PWM*/
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
+
 /* Define UART Init prototypes */
 extern void MX_USART1_UART_Init(void);
 extern void MX_USART2_UART_Init(void);
@@ -149,11 +166,20 @@ extern void MX_USART6_UART_Init(void);
 extern void SystemClock_Config(void);
 extern void ExecuteMonitor(void);
 
+
+
+/*-----------------Private function------------------*/
+extern H_BridgeMode MotorON();
+extern H_BridgeMode SetupMotor(uint8_t MovementDirection);
+extern H_BridgeMode MotorOFF();
+extern H_BridgeMode MotorPWM(uint32_t freq, uint8_t dutycycle);
 /* -----------------------------------------------------------------------
  |								  APIs							          |  																 	|
 /* -----------------------------------------------------------------------
  */
-
+extern Module_Status Turn_ON(uint8_t direction);
+extern Module_Status Turn_OFF();
+extern Module_Status Turn_PWM(uint8_t direction,uint8_t dutyCycle);
 void SetupPortForRemoteBootloaderUpdate(uint8_t port);
 void remoteBootloaderUpdate(uint8_t src,uint8_t dst,uint8_t inport,uint8_t outport);
 
