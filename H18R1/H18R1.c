@@ -37,13 +37,44 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
 H_BridgeMode Mode=stop;
+
 /* Private function prototypes -----------------------------------------------*/
 void MX_TIM2_Init(void);
 void MX_TIM3_Init(void);
 void ExecuteMonitor(void);
 
 /* Create CLI commands --------------------------------------------------------*/
+portBASE_TYPE CLI_Turn_ONCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
+portBASE_TYPE CLI_Turn_OFFCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
+portBASE_TYPE CLI_Turn_PWMCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
 
+/* CLI command structure : Turn_ON */
+const CLI_Command_Definition_t CLI_Turn_ONCommandDefinition =
+{
+	( const int8_t * ) "turn_on", /* The command string to type. */
+	( const int8_t * ) "turn_on :\r\n Parameters required to execute a Turn_ON: Direction forward or backward \r\n\r\n",
+	CLI_Turn_ONCommand, /* The function to run. */
+	1 /* one parameters are expected. */
+};
+
+/* CLI command structure : Turn_OFF */
+const CLI_Command_Definition_t CLI_Turn_OFFCommandDefinition =
+{
+	( const int8_t * ) "turn_off", /* The command string to type. */
+	( const int8_t * ) "turn_off :\r\n Parameters required to execute a Turn_OFF:  \r\n\r\n",
+	CLI_Turn_OFFCommand, /* The function to run. */
+	0 /* zero parameters are expected. */
+};
+
+/* CLI command structure : Turn_PWM */
+const CLI_Command_Definition_t CLI_Turn_PWMCommandDefinition =
+{
+	( const int8_t * ) "turn_pwm", /* The command string to type. */
+	( const int8_t * ) "turn_pwm :\r\n Parameters required to execute a Turn_PWM: Direction forward or backward and"
+		" dutyCycle: PWM duty cycle in precentage (0 to 100) \r\n\r\n",
+		CLI_Turn_PWMCommand, /* The function to run. */
+	2 /* two parameters are expected. */
+};
 /*-----------------------------------------------------------*/
 
 /* -----------------------------------------------------------------------
@@ -357,6 +388,11 @@ uint8_t GetPort(UART_HandleTypeDef *huart){
 /* --- Register this module CLI Commands
  */
 void RegisterModuleCLICommands(void){
+    FreeRTOS_CLIRegisterCommand(&CLI_Turn_ONCommandDefinition);
+    FreeRTOS_CLIRegisterCommand(&CLI_Turn_OFFCommandDefinition);
+    FreeRTOS_CLIRegisterCommand(&CLI_Turn_PWMCommandDefinition);
+
+
 
 }
 
@@ -548,7 +584,109 @@ Module_Status Turn_PWM(uint8_t direction,uint8_t dutyCycle){
  |								Commands							      |
    -----------------------------------------------------------------------
  */
+portBASE_TYPE CLI_Turn_ONCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString ){
+	Module_Status status = H18R1_OK;
 
+	uint8_t direction;
+
+	static int8_t *pcParameterString1;
+	portBASE_TYPE xParameterStringLength1 =0;
+
+	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is on :\r\n %d  \n\r";
+	static const int8_t *pcWrongParamsMessage =(int8_t* )"Wrong Params!\n\r";
+
+
+	(void )xWriteBufferLen;
+	configASSERT(pcWriteBuffer);
+
+	pcParameterString1 =(int8_t* )FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength1 );
+	direction =(uint8_t )atol((char* )pcParameterString1);
+
+
+	status=Turn_ON(direction);
+	if(status == H18R1_OK)
+	{
+		sprintf((char* )pcWriteBuffer,(char* )pcOKMessage,direction);
+
+	}
+
+	else if(status == H18R1_ERR_WrongParams)
+		strcpy((char* )pcWriteBuffer,(char* )pcWrongParamsMessage);
+
+
+
+	return pdFALSE;
+}
+
+/* ----------------------------------------------------------------------------*/
+portBASE_TYPE CLI_Turn_OFFCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString ){
+	Module_Status status = H18R1_OK;
+
+	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is off \n\r";
+	static const int8_t *pcErrorsMessage =(int8_t* )"Error Params!\n\r";
+
+		(void )xWriteBufferLen;
+		configASSERT(pcWriteBuffer);
+
+	 	status=Turn_OFF();
+
+	 if(status == H18R1_OK)
+	 {
+			 sprintf((char* )pcWriteBuffer,(char* )pcOKMessage);
+
+	 }
+
+	 else if(status == H18R1_ERROR)
+			strcpy((char* )pcWriteBuffer,(char* )pcErrorsMessage);
+
+
+	return pdFALSE;
+
+}
+/* ----------------------------------------------------------------------------*/
+portBASE_TYPE CLI_Turn_PWMCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString ){
+	Module_Status status = H18R1_OK;
+
+	uint8_t direction;
+	uint8_t dutyCycle;
+
+	static int8_t *pcParameterString1;
+	static int8_t *pcParameterString2;
+
+	portBASE_TYPE xParameterStringLength1 =0;
+	portBASE_TYPE xParameterStringLength2 =0;
+
+	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is on in mode PWM in duty cycle : \r\n %c %";
+	static const int8_t *pcWrongParamsMessage =(int8_t* )"WrongParams!\n\r";
+	(void )xWriteBufferLen;
+	configASSERT(pcWriteBuffer);
+
+
+	pcParameterString1 =(int8_t* )FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength1 );
+	direction =(uint8_t )atol((char* )pcParameterString1);
+
+	 pcParameterString2 =(int8_t* )FreeRTOS_CLIGetParameter(pcCommandString, 2, &xParameterStringLength2 );
+	 dutyCycle =(uint8_t )atol((char* )pcParameterString2);
+
+	 status=Turn_PWM(direction, dutyCycle);
+
+	 if(status == H18R1_OK)
+	 {
+		 sprintf((char* )pcWriteBuffer,(char* )pcOKMessage,direction,dutyCycle);
+
+	 }
+
+	 else if(status == H18R1_ERR_WrongParams)
+	 {
+		strcpy((char* )pcWriteBuffer,(char* )pcWrongParamsMessage);
+	 }
+
+
+	return pdFALSE;
+
+}
+
+/* ----------------------------------------------------------------------------*/
 
 
 /*-----------------------------------------------------------*/

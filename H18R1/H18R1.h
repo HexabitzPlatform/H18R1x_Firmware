@@ -180,6 +180,7 @@ extern H_BridgeMode MotorPWM(uint32_t freq, uint8_t dutycycle);
 extern Module_Status Turn_ON(uint8_t direction);
 extern Module_Status Turn_OFF();
 extern Module_Status Turn_PWM(uint8_t direction,uint8_t dutyCycle);
+
 void SetupPortForRemoteBootloaderUpdate(uint8_t port);
 void remoteBootloaderUpdate(uint8_t src,uint8_t dst,uint8_t inport,uint8_t outport);
 
@@ -187,7 +188,9 @@ void remoteBootloaderUpdate(uint8_t src,uint8_t dst,uint8_t inport,uint8_t outpo
  |								Commands							      |															 	|
 /* -----------------------------------------------------------------------
  */
-
+extern const CLI_Command_Definition_t CLI_Turn_ONCommandDefinition;
+extern const CLI_Command_Definition_t CLI_Turn_OFFCommandDefinition;
+extern const CLI_Command_Definition_t CLI_Turn_PWMCommandDefinition;
 
 #endif /* H18R1_H */
 
