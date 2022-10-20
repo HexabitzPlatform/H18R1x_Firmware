@@ -354,8 +354,25 @@ void Module_Peripheral_Init(void){
 Module_Status Module_MessagingTask(uint16_t code,uint8_t port,uint8_t src,uint8_t dst,uint8_t shift){
 	Module_Status result =H18R1_OK;
 
+	uint8_t direction;
+	uint8_t dutyCycle=0;
+
 
 	switch(code){
+		case CODE_H18R1_Turn_ON:
+			direction=(uint8_t)cMessage[port - 1][shift];
+			Turn_ON(direction);
+			break;
+
+		case CODE_H18R1_Turn_OFF:
+			Turn_OFF();
+			break;
+
+		case CODE_H18R1_Turn_PWM:
+			direction=(uint8_t)cMessage[port - 1][shift];
+			dutyCycle=(uint8_t)cMessage[port - 1][1 + shift];
+			Turn_PWM(direction, dutyCycle);
+			break;
 
 		default:
 			result =H18R1_ERR_UnknownMessage;
@@ -436,20 +453,28 @@ H_BridgeMode SetupMotor(uint8_t MovementDirection){
 
 	H_BridgeMode status=H18R1_OK;
 
-	MotorON();
 	switch (MovementDirection){
 	case forward:
-	HAL_GPIO_WritePin(IN1_GPIO_Port ,IN1_Pin ,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(IN3_GPIO_Port ,IN3_Pin ,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_RESET);
-	break;
+
+		HAL_GPIO_WritePin(IN1_GPIO_Port ,IN1_Pin ,GPIO_PIN_SET);
+		HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(IN3_GPIO_Port ,IN3_Pin ,GPIO_PIN_SET);
+		HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_RESET);
+		break;
 	case backward:
-	HAL_GPIO_WritePin(IN1_GPIO_Port ,IN1_Pin ,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(IN3_GPIO_Port ,IN3_Pin ,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_SET);
-	break;
+		HAL_GPIO_WritePin(IN1_GPIO_Port ,IN1_Pin ,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_SET);
+		HAL_GPIO_WritePin(IN3_GPIO_Port ,IN3_Pin ,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_SET);
+		break;
+	case stop:
+		HAL_GPIO_WritePin(IN1_GPIO_Port ,IN1_Pin ,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(IN3_GPIO_Port ,IN3_Pin ,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_RESET);
+		break;
+
+
 
 	default: break;
 
@@ -535,6 +560,7 @@ Module_Status Turn_ON(uint8_t direction){
     	 PWM_stop();
      }
 
+ 	 MotorON();
 	 SetupMotor(direction);
 	 Mode=direction;
 
@@ -543,6 +569,7 @@ Module_Status Turn_ON(uint8_t direction){
 }
 
 /*-----------------------------------------------------------------------------*/
+
 /*------------------Off the motor---------------*/
 Module_Status Turn_OFF(){
 
@@ -553,6 +580,7 @@ Module_Status Turn_OFF(){
         PWM_stop();
     }
     MotorOFF();
+    SetupMotor(stop);
     Mode=stop;
 
 	return status;
