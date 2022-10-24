@@ -169,10 +169,10 @@ extern void ExecuteMonitor(void);
 
 
 /*-----------------Private function------------------*/
-extern H_BridgeMode MotorON();
-extern H_BridgeMode SetupMotor(uint8_t MovementDirection);
-extern H_BridgeMode MotorOFF();
-extern H_BridgeMode MotorPWM(uint32_t freq, uint8_t dutycycle);
+extern Module_Status MotorON();
+extern Module_Status SetupMotor(H_BridgeMode MovementDirection);
+extern Module_Status MotorOFF();
+extern Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle);
 /* -----------------------------------------------------------------------
  |								  APIs							          |  																 	|
 /* -----------------------------------------------------------------------

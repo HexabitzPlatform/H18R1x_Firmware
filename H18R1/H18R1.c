@@ -438,9 +438,9 @@ void RegisterModuleCLICommands(void){
 
 
 /*-----------------------------------------------------------*/
-H_BridgeMode MotorON(){
+Module_Status MotorON(){
 
-	H_BridgeMode status=H18R1_OK;
+	Module_Status status=H18R1_OK;
 
 	HAL_GPIO_WritePin(TIM3_CH3_ENA_GPIO_Port ,TIM3_CH3_ENA_Pin ,GPIO_PIN_SET);
 	HAL_GPIO_WritePin(TIM2_CH1_ENB_GPIO_Port ,TIM2_CH1_ENB_Pin ,GPIO_PIN_SET);
@@ -449,9 +449,9 @@ H_BridgeMode MotorON(){
 
 }
 /*-----------------------------------------------------------*/
-H_BridgeMode SetupMotor(uint8_t MovementDirection){
+Module_Status SetupMotor(H_BridgeMode MovementDirection){
 
-	H_BridgeMode status=H18R1_OK;
+	Module_Status status=H18R1_OK;
 
 	switch (MovementDirection){
 	case forward:
@@ -483,9 +483,9 @@ H_BridgeMode SetupMotor(uint8_t MovementDirection){
 	return status;
 }
 /*-----------------------------------------------------------*/
-H_BridgeMode MotorOFF(){
+Module_Status MotorOFF(){
 
-	H_BridgeMode status=H18R1_OK;
+	Module_Status status=H18R1_OK;
 
 	HAL_GPIO_WritePin(TIM3_CH3_ENA_GPIO_Port ,TIM3_CH3_ENA_Pin ,GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(TIM2_CH1_ENB_GPIO_Port ,TIM2_CH1_ENB_Pin ,GPIO_PIN_RESET);
@@ -494,9 +494,9 @@ H_BridgeMode MotorOFF(){
 
 }
 /*-----------------------------------------------------------*/
-H_BridgeMode PWM_stop(){
+Module_Status PWM_stop(){
 
-	H_BridgeMode status=H18R1_OK;
+	Module_Status status=H18R1_OK;
 
 	HAL_TIM_Base_DeInit(&htim2);
 	HAL_TIM_Base_DeInit(&htim3);
@@ -514,9 +514,9 @@ H_BridgeMode PWM_stop(){
 /*-----------------------------------------------------------*/
 
 /* --- Set Motor PWM frequency and dutycycle ---*/
-H_BridgeMode MotorPWM(uint32_t freq, uint8_t dutycycle) {
+Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle) {
 
-	H_BridgeMode status=H18R1_OK;
+	Module_Status status=H18R1_OK;
 
 	uint32_t period = PWM_TIMER_CLOCK / freq;
 
