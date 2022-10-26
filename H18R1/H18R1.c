@@ -37,7 +37,7 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim14;
 
 H_BridgeMode Mode =stop;
-H_BridgeMode Old_Mode=forward;
+H_BridgeMode Old_Mode=on;
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -458,12 +458,12 @@ Module_Status SetupMotor(H_BridgeMode MovementDirection){
 
 	switch (MovementDirection){
 	case forward:
-
 		HAL_GPIO_WritePin(TIM3_CH2_IN1_GPIO_Port ,TIM3_CH2_IN1_Pin ,GPIO_PIN_SET);
 		HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(TIM14_CH1_IN3_GPIO_Port ,TIM14_CH1_IN3_Pin ,GPIO_PIN_SET);
 		HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_RESET);
 		break;
+
 	case backward:
 		HAL_GPIO_WritePin(TIM3_CH2_IN1_GPIO_Port ,TIM3_CH2_IN1_Pin ,GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_SET);
@@ -557,6 +557,15 @@ Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle) {
 Module_Status Turn_ON(uint8_t direction){
 
      Module_Status status=H18R1_OK;
+     MotorOFF();
+
+
+//     if(direction!= forward || direction!= backward){
+//     	status= H18R1_ERR_WrongParams;
+//     	return status;
+//
+//
+//     }
 
 
      if(Mode==pwm)
@@ -566,6 +575,8 @@ Module_Status Turn_ON(uint8_t direction){
 
  	 MotorON();
 	 SetupMotor(direction);
+	 Mode=on;
+	 Old_Mode=Mode;
 
 	 return status;
 
@@ -594,15 +605,26 @@ Module_Status Turn_OFF(){
 Module_Status Turn_PWM(uint8_t direction,uint8_t dutyCycle){
 
     Module_Status status=H18R1_OK;
+    MotorOFF();
 
+//    if(direction!= forward || direction!= backward){
+//    	status= H18R1_ERR_WrongParams;
+//    	return status;
+//
+//
+//    }
 
-    if (dutyCycle < 0 || dutyCycle > 100)
-       return H18R1_ERR_WrongParams;
+    if (dutyCycle < 0 || dutyCycle > 100){
+    	status= H18R1_ERR_WrongParams;
+		return status;
+
+    }
 
 	MotorON();
 	SetupMotor(direction);
 	MotorPWM(H_Bridge_PWM_FREQ, dutyCycle);
 	Mode=pwm;
+	Old_Mode=Mode;
 
 
 
@@ -688,7 +710,7 @@ portBASE_TYPE CLI_Turn_PWMCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen
 	portBASE_TYPE xParameterStringLength1 =0;
 	portBASE_TYPE xParameterStringLength2 =0;
 
-	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is on in mode PWM in duty cycle %d \r\n";
+	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is on in mode PWM in duty cycle %s %d% \r\n";
 	static const int8_t *pcWrongParamsMessage =(int8_t* )"WrongParams!\n\r";
 	(void )xWriteBufferLen;
 	configASSERT(pcWriteBuffer);
