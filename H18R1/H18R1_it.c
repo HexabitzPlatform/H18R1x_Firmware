@@ -9,6 +9,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "BOS.h"
+#include "H18R1.h"
 
 uint8_t temp_length[NumOfPorts] = {0};
 uint8_t temp_index[NumOfPorts] = {0};
@@ -290,7 +291,18 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 }
 
 /*-----------------------------------------------------------*/
+void TIM3_TIM4_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM3_TIM4_IRQn 0 */
 
+  /* USER CODE END TIM3_TIM4_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim3);
+  HAL_TIM_IRQHandler(&htim14);
+
+  /* USER CODE BEGIN TIM3_TIM4_IRQn 1 */
+
+  /* USER CODE END TIM3_TIM4_IRQn 1 */
+}
 /*-----------------------------------------------------------*/
 
 /* Run time stack overflow checking is performed if

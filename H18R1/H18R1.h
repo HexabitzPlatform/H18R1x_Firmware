@@ -9,7 +9,7 @@
 (Description of Special module peripheral configuration):
 
 >> USARTs 1,2,3,5,6 for module ports.
->> Timer2 (Ch1) & Timer3 (Ch3) for L298 PWM.
+>> Timer3 (Ch2) & Timer14 (Ch1) for L298 PWM.
 
  */
 
@@ -98,27 +98,27 @@
 #define NUM_MODULE_PARAMS						1
 
 /*  Pins For H_Bridge*/
-#define IN1_Pin                               GPIO_PIN_7
-#define IN1_GPIO_Port 						  GPIOA
+#define TIM3_CH2_IN1_Pin                      GPIO_PIN_7
+#define TIM3_CH2_IN1_GPIO_Port  			  GPIOA
 
 #define IN2_Pin                               GPIO_PIN_1
 #define IN2_GPIO_Port                         GPIOB
 
-#define IN3_Pin                               GPIO_PIN_4
-#define IN3_GPIO_Port                         GPIOA
+#define TIM14_CH1_IN3_Pin                     GPIO_PIN_4
+#define TIM14_CH1_IN3_GPIO_Port               GPIOA
 
 #define IN4_Pin                               GPIO_PIN_6
 #define IN4_GPIO_Port                         GPIOA
 
-#define TIM2_CH1_ENB_Pin                      GPIO_PIN_5
-#define TIM2_CH1_ENB_GPIO_Port                GPIOA
+#define ENB_Pin                               GPIO_PIN_5
+#define ENB_GPIO_Port                         GPIOA
 
-#define TIM3_CH3_ENA_Pin                      GPIO_PIN_0
-#define TIM3_CH3_ENA_GPIO_Port                GPIOB
+#define ENA_Pin                               GPIO_PIN_0
+#define ENA_GPIO_Port                         GPIOB
 
 
-#define PWM_TIMER_CLOCK							16000000
-#define H_Bridge_PWM_FREQ						40000
+#define PWM_TIMER_CLOCK							1000000
+#define H_Bridge_PWM_FREQ						10000
 
 
 
@@ -136,7 +136,8 @@ typedef enum {
 } Module_Status;
 
 typedef enum {
-	forward=1,
+	on=1,
+	forward,
 	backward,
 	pwm,
 	stop
@@ -154,8 +155,8 @@ extern UART_HandleTypeDef huart5;
 extern UART_HandleTypeDef huart6;
 
 /*Timer for PWM*/
-extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim14;
 
 /* Define UART Init prototypes */
 extern void MX_USART1_UART_Init(void);
@@ -166,7 +167,7 @@ extern void MX_USART6_UART_Init(void);
 extern void SystemClock_Config(void);
 extern void ExecuteMonitor(void);
 
-
+extern H_BridgeMode Mode;
 
 /*-----------------Private function------------------*/
 extern Module_Status MotorON();

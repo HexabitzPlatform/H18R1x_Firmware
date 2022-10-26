@@ -9,7 +9,7 @@
 (Description of Special module peripheral configuration):
 
 >> USARTs 1,2,3,5,6 for module ports.
->> Timer2 (Ch1) & Timer3 (Ch3) for L298 PWM.
+>> Timer3 (Ch2) & Timer14 (Ch1) for L298 PWM.
 
  */
 
@@ -33,14 +33,16 @@ module_param_t modParam[NUM_MODULE_PARAMS] ={{.paramPtr = NULL, .paramFormat =FM
 /* Private variables ---------------------------------------------------------*/
 
 /*Timer for PWM*/
-TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim14;
 
-H_BridgeMode Mode=stop;
+H_BridgeMode Mode =stop;
+H_BridgeMode Old_Mode=forward;
+
 
 /* Private function prototypes -----------------------------------------------*/
-void MX_TIM2_Init(void);
 void MX_TIM3_Init(void);
+void MX_TIM14_Init(void);
 void ExecuteMonitor(void);
 
 /* Create CLI commands --------------------------------------------------------*/
@@ -61,7 +63,7 @@ const CLI_Command_Definition_t CLI_Turn_ONCommandDefinition =
 const CLI_Command_Definition_t CLI_Turn_OFFCommandDefinition =
 {
 	( const int8_t * ) "turn_off", /* The command string to type. */
-	( const int8_t * ) "turn_off :\r\n Parameters required to execute a Turn_OFF:  \r\n\r\n",
+	( const int8_t * ) "turn_off :\r\n Parameters required to execute a Turn_OFF  \r\n\r\n",
 	CLI_Turn_OFFCommand, /* The function to run. */
 	0 /* zero parameters are expected. */
 };
@@ -338,11 +340,11 @@ void Module_Peripheral_Init(void){
 
 
 	/*H_Bridge GPIO Init: */
-	H_Bridge_gpio_init;
+	H_Bridge_gpio_init();
 
 	/*init timers for pwm*/
-	 MX_TIM2_Init();
 	 MX_TIM3_Init();
+	 MX_TIM14_Init();
 
 
 	/* Create module special task (if needed) */
@@ -441,9 +443,10 @@ void RegisterModuleCLICommands(void){
 Module_Status MotorON(){
 
 	Module_Status status=H18R1_OK;
+	H_Bridge_gpio_init();
 
-	HAL_GPIO_WritePin(TIM3_CH3_ENA_GPIO_Port ,TIM3_CH3_ENA_Pin ,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(TIM2_CH1_ENB_GPIO_Port ,TIM2_CH1_ENB_Pin ,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(ENA_GPIO_Port ,ENA_Pin ,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(ENB_GPIO_Port ,ENB_Pin ,GPIO_PIN_SET);
 
 	return status;
 
@@ -456,23 +459,18 @@ Module_Status SetupMotor(H_BridgeMode MovementDirection){
 	switch (MovementDirection){
 	case forward:
 
-		HAL_GPIO_WritePin(IN1_GPIO_Port ,IN1_Pin ,GPIO_PIN_SET);
+		HAL_GPIO_WritePin(TIM3_CH2_IN1_GPIO_Port ,TIM3_CH2_IN1_Pin ,GPIO_PIN_SET);
 		HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(IN3_GPIO_Port ,IN3_Pin ,GPIO_PIN_SET);
+		HAL_GPIO_WritePin(TIM14_CH1_IN3_GPIO_Port ,TIM14_CH1_IN3_Pin ,GPIO_PIN_SET);
 		HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_RESET);
 		break;
 	case backward:
-		HAL_GPIO_WritePin(IN1_GPIO_Port ,IN1_Pin ,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(TIM3_CH2_IN1_GPIO_Port ,TIM3_CH2_IN1_Pin ,GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_SET);
-		HAL_GPIO_WritePin(IN3_GPIO_Port ,IN3_Pin ,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(TIM14_CH1_IN3_GPIO_Port ,TIM14_CH1_IN3_Pin  ,GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_SET);
 		break;
-	case stop:
-		HAL_GPIO_WritePin(IN1_GPIO_Port ,IN1_Pin ,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(IN3_GPIO_Port ,IN3_Pin ,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_RESET);
-		break;
+
 
 
 
@@ -486,9 +484,10 @@ Module_Status SetupMotor(H_BridgeMode MovementDirection){
 Module_Status MotorOFF(){
 
 	Module_Status status=H18R1_OK;
+	H_Bridge_gpio_init();
 
-	HAL_GPIO_WritePin(TIM3_CH3_ENA_GPIO_Port ,TIM3_CH3_ENA_Pin ,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(TIM2_CH1_ENB_GPIO_Port ,TIM2_CH1_ENB_Pin ,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(ENA_GPIO_Port ,ENA_Pin ,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(ENB_GPIO_Port ,ENB_Pin ,GPIO_PIN_RESET);
 
 	return status;
 
@@ -498,14 +497,18 @@ Module_Status PWM_stop(){
 
 	Module_Status status=H18R1_OK;
 
-	HAL_TIM_Base_DeInit(&htim2);
+
 	HAL_TIM_Base_DeInit(&htim3);
+	HAL_TIM_Base_DeInit(&htim14);
 
-	HAL_TIM_PWM_DeInit(&htim2);
 	HAL_TIM_PWM_DeInit(&htim3);
+	HAL_TIM_PWM_DeInit(&htim14);
 
-	HAL_TIM_Base_MspDeInit(&htim2);
 	HAL_TIM_Base_MspDeInit(&htim3);
+	HAL_TIM_Base_MspDeInit(&htim14);
+
+	HAL_NVIC_DisableIRQ(TIM3_TIM4_IRQn);
+
 
 	return status;
 
@@ -522,23 +525,23 @@ Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle) {
 
 	if(Mode!=pwm)
 	{
-		MX_TIM2_Init();
 		MX_TIM3_Init();
+		MX_TIM14_Init();
 
 	}
 
 
 	/* PWM period */
-	htim2.Instance->ARR = period - 1;
 	htim3.Instance->ARR = period - 1;
+	htim14.Instance->ARR = period - 1;
 
 	/* PWM duty cycle */
-	htim2.Instance->CCR1 = ((float) dutycycle / 100.0f) * period;
-	htim3.Instance->CCR3 = ((float) dutycycle / 100.0f) * period;
+	htim3.Instance->CCR2 = ((float) dutycycle / 100.0f) * period;
+	htim14.Instance->CCR1 = ((float) dutycycle / 100.0f) * period;
 
-	if (HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1 ) != HAL_OK)
+	if (HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2 ) != HAL_OK)
 		return H18R1_ERROR;
-	if (HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_3 ) != HAL_OK)
+	if (HAL_TIM_PWM_Start(&htim14,TIM_CHANNEL_1 ) != HAL_OK)
 		return H18R1_ERROR;
 
 	return status;
@@ -555,6 +558,7 @@ Module_Status Turn_ON(uint8_t direction){
 
      Module_Status status=H18R1_OK;
 
+
      if(Mode==pwm)
      {
     	 PWM_stop();
@@ -562,7 +566,6 @@ Module_Status Turn_ON(uint8_t direction){
 
  	 MotorON();
 	 SetupMotor(direction);
-	 Mode=direction;
 
 	 return status;
 
@@ -580,7 +583,6 @@ Module_Status Turn_OFF(){
         PWM_stop();
     }
     MotorOFF();
-    SetupMotor(stop);
     Mode=stop;
 
 	return status;
@@ -593,9 +595,11 @@ Module_Status Turn_PWM(uint8_t direction,uint8_t dutyCycle){
 
     Module_Status status=H18R1_OK;
 
+
     if (dutyCycle < 0 || dutyCycle > 100)
        return H18R1_ERR_WrongParams;
 
+	MotorON();
 	SetupMotor(direction);
 	MotorPWM(H_Bridge_PWM_FREQ, dutyCycle);
 	Mode=pwm;
@@ -620,7 +624,7 @@ portBASE_TYPE CLI_Turn_ONCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen,
 	static int8_t *pcParameterString1;
 	portBASE_TYPE xParameterStringLength1 =0;
 
-	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is on :\r\n %d  \n\r";
+	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is on \r\n  \n\r";
 	static const int8_t *pcWrongParamsMessage =(int8_t* )"Wrong Params!\n\r";
 
 
@@ -684,7 +688,7 @@ portBASE_TYPE CLI_Turn_PWMCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen
 	portBASE_TYPE xParameterStringLength1 =0;
 	portBASE_TYPE xParameterStringLength2 =0;
 
-	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is on in mode PWM in duty cycle : \r\n %c %";
+	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is on in mode PWM in duty cycle %d \r\n";
 	static const int8_t *pcWrongParamsMessage =(int8_t* )"WrongParams!\n\r";
 	(void )xWriteBufferLen;
 	configASSERT(pcWriteBuffer);
