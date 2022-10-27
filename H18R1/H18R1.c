@@ -554,18 +554,19 @@ Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle) {
  */
 
 /*--------------Run the motor at full speed------------*/
-Module_Status Turn_ON(uint8_t direction){
+Module_Status Turn_ON(H_BridgeMode direction){
 
      Module_Status status=H18R1_OK;
      MotorOFF();
 
 
-//     if(direction!= forward || direction!= backward){
-//     	status= H18R1_ERR_WrongParams;
-//     	return status;
-//
-//
-//     }
+     if((direction!= 1 || direction!= forward) && (direction!= 2 || direction!= backward))
+     {
+     	status= H18R1_ERR_WrongParams;
+     	return status;
+
+     }
+
 
 
      if(Mode==pwm)
@@ -602,22 +603,23 @@ Module_Status Turn_OFF(){
 /* --- Turn-on H_Bridge with pulse-width modulation (PWM) ---
  dutyCycle: PWM duty cycle in precentage (0 to 100)
  */
-Module_Status Turn_PWM(uint8_t direction,uint8_t dutyCycle){
+Module_Status Turn_PWM(H_BridgeMode direction,uint8_t dutyCycle){
 
     Module_Status status=H18R1_OK;
     MotorOFF();
 
-//    if(direction!= forward || direction!= backward){
-//    	status= H18R1_ERR_WrongParams;
-//    	return status;
-//
-//
-//    }
 
-    if (dutyCycle < 0 || dutyCycle > 100){
+    if((direction!= 1 || direction!= forward) && (direction!= 2 || direction!= backward))
+    {
+    	status= H18R1_ERR_WrongParams;
+    	return status;
+
+    }
+
+    if (dutyCycle < 0 || dutyCycle > 100)
+    {
     	status= H18R1_ERR_WrongParams;
 		return status;
-
     }
 
 	MotorON();
@@ -641,7 +643,7 @@ Module_Status Turn_PWM(uint8_t direction,uint8_t dutyCycle){
 portBASE_TYPE CLI_Turn_ONCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString ){
 	Module_Status status = H18R1_OK;
 
-	uint8_t direction;
+	H_BridgeMode direction;
 
 	static int8_t *pcParameterString1;
 	portBASE_TYPE xParameterStringLength1 =0;
@@ -654,7 +656,7 @@ portBASE_TYPE CLI_Turn_ONCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen,
 	configASSERT(pcWriteBuffer);
 
 	pcParameterString1 =(int8_t* )FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength1 );
-	direction =(uint8_t )atol((char* )pcParameterString1);
+	direction =(H_BridgeMode )atol((char* )pcParameterString1);
 
 
 	status=Turn_ON(direction);
@@ -701,7 +703,7 @@ portBASE_TYPE CLI_Turn_OFFCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen
 portBASE_TYPE CLI_Turn_PWMCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString ){
 	Module_Status status = H18R1_OK;
 
-	uint8_t direction;
+	H_BridgeMode direction;
 	uint8_t dutyCycle;
 
 	static int8_t *pcParameterString1;
@@ -710,14 +712,14 @@ portBASE_TYPE CLI_Turn_PWMCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen
 	portBASE_TYPE xParameterStringLength1 =0;
 	portBASE_TYPE xParameterStringLength2 =0;
 
-	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is on in mode PWM in duty cycle %s %d% \r\n";
+	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is on in mode PWM in duty cycle   %d percent \r\n";
 	static const int8_t *pcWrongParamsMessage =(int8_t* )"WrongParams!\n\r";
 	(void )xWriteBufferLen;
 	configASSERT(pcWriteBuffer);
 
 
 	pcParameterString1 =(int8_t* )FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength1 );
-	direction =(uint8_t )atol((char* )pcParameterString1);
+	direction =(H_BridgeMode )atol((char* )pcParameterString1);
 
 	 pcParameterString2 =(int8_t* )FreeRTOS_CLIGetParameter(pcCommandString, 2, &xParameterStringLength2 );
 	 dutyCycle =(uint8_t )atol((char* )pcParameterString2);

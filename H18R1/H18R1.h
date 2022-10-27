@@ -136,9 +136,9 @@ typedef enum {
 } Module_Status;
 
 typedef enum {
-	on=1,
-	forward,
+	forward=1,
 	backward,
+	on,
 	pwm,
 	stop
 } H_BridgeMode;
@@ -178,9 +178,9 @@ extern Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle);
  |								  APIs							          |  																 	|
 /* -----------------------------------------------------------------------
  */
-extern Module_Status Turn_ON(uint8_t direction);
+extern Module_Status Turn_ON(H_BridgeMode direction);
 extern Module_Status Turn_OFF();
-extern Module_Status Turn_PWM(uint8_t direction,uint8_t dutyCycle);
+extern Module_Status Turn_PWM(H_BridgeMode direction,uint8_t dutyCycle);
 
 void SetupPortForRemoteBootloaderUpdate(uint8_t port);
 void remoteBootloaderUpdate(uint8_t src,uint8_t dst,uint8_t inport,uint8_t outport);
