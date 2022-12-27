@@ -121,6 +121,7 @@
 #define H_Bridge_PWM_FREQ						10000
 
 
+
 /* Module EEPROM Variables */
 
 // Module Addressing Space 500 - 599
@@ -142,10 +143,6 @@ typedef enum {
 	stop
 } H_BridgeMode;
 
-typedef enum {
-	MotorA=1,
-	MotorB
-} Motor;
 /* Indicator LED */
 #define _IND_LED_PORT			GPIOB
 #define _IND_LED_PIN			GPIO_PIN_7
@@ -170,19 +167,20 @@ extern void MX_USART6_UART_Init(void);
 extern void SystemClock_Config(void);
 extern void ExecuteMonitor(void);
 
+extern H_BridgeMode Mode;
 
 /*-----------------Private function------------------*/
-extern Module_Status MotorON(Motor motor);
+extern Module_Status MotorON();
 extern Module_Status SetupMotor(H_BridgeMode MovementDirection);
-extern Module_Status MotorOFF(Motor motor);
+extern Module_Status MotorOFF();
 extern Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle);
 /* -----------------------------------------------------------------------
  |								  APIs							          |  																 	|
 /* -----------------------------------------------------------------------
  */
-extern Module_Status Turn_ON(H_BridgeMode direction,Motor motor);
-extern Module_Status Turn_OFF(Motor motor);
-extern Module_Status Turn_PWM(H_BridgeMode direction,uint8_t dutyCycle,Motor motor);
+extern Module_Status Turn_ON(H_BridgeMode direction);
+extern Module_Status Turn_OFF();
+extern Module_Status Turn_PWM(H_BridgeMode direction,uint8_t dutyCycle);
 
 void SetupPortForRemoteBootloaderUpdate(uint8_t port);
 void remoteBootloaderUpdate(uint8_t src,uint8_t dst,uint8_t inport,uint8_t outport);
