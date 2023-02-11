@@ -25,7 +25,7 @@
 TIM_HandleTypeDef htim16; /* micro-second delay counter */
 //TIM_HandleTypeDef htim15; /* milli-second delay counter */
 TIM_HandleTypeDef htim17; /* milli-second delay counter */
-
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 ///*Timer for PWM*/
 //TIM_HandleTypeDef htim2;
 //TIM_HandleTypeDef htim3;
@@ -163,6 +163,63 @@ void MX_TIM14_Init(void)
 
   /* USER CODE END TIM14_Init 2 */
   HAL_TIM_MspPostInit(&htim14);
+
+}
+
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  if(htim->Instance==TIM3)
+  {
+  /* USER CODE BEGIN TIM3_MspPostInit 0 */
+
+  /* USER CODE END TIM3_MspPostInit 0 */
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    /**TIM3 GPIO Configuration
+    PA7     ------> TIM3_CH2
+    */
+    GPIO_InitStruct.Pin = TIM3_CH2_IN1_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF1_TIM3;
+    HAL_GPIO_Init(TIM3_CH2_IN1_GPIO_Port, &GPIO_InitStruct);
+
+    /* Peripheral interrupt init */
+    /* TIM3 interrupt Init */
+       HAL_NVIC_SetPriority(TIM3_TIM4_IRQn, 0, 0);
+       HAL_NVIC_EnableIRQ(TIM3_TIM4_IRQn);
+
+  /* USER CODE BEGIN TIM3_MspPostInit 1 */
+
+  /* USER CODE END TIM3_MspPostInit 1 */
+  }
+  else if(htim->Instance==TIM14)
+  {
+  /* USER CODE BEGIN TIM14_MspPostInit 0 */
+
+  /* USER CODE END TIM14_MspPostInit 0 */
+
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    /**TIM14 GPIO Configuration
+    PA4     ------> TIM14_CH1
+    */
+    GPIO_InitStruct.Pin = TIM14_CH1_IN3_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF4_TIM14;
+    HAL_GPIO_Init(TIM14_CH1_IN3_GPIO_Port, &GPIO_InitStruct);
+
+    /* Peripheral interrupt init */
+   	HAL_NVIC_SetPriority(TIM14_IRQn, 0, 0);
+   	HAL_NVIC_EnableIRQ(TIM14_IRQn);
+
+
+  /* USER CODE BEGIN TIM3_MspPostInit 1 */
+
+  /* USER CODE END TIM3_MspPostInit 1 */
+  }
 
 }
 

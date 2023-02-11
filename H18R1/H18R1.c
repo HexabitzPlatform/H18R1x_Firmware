@@ -441,13 +441,19 @@ void RegisterModuleCLICommands(void){
 
 
 /*-----------------------------------------------------------*/
-Module_Status MotorON(){
+Module_Status MotorON(Motor motor){
 
 	Module_Status status=H18R1_OK;
-
+	if(motor==MotorA){
 		HAL_GPIO_WritePin(ENA_GPIO_Port ,ENA_Pin ,GPIO_PIN_SET);
 
+	}
+	else if(motor==MotorB){
 		HAL_GPIO_WritePin(ENB_GPIO_Port ,ENB_Pin ,GPIO_PIN_SET);
+
+	}
+
+
 
 
 	return status;
@@ -536,6 +542,7 @@ Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle,Motor motor) {
 	}
 
 
+
 	if (HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2 ) != HAL_OK)
 		return H18R1_ERROR;
 	if (HAL_TIM_PWM_Start(&htim14,TIM_CHANNEL_1 ) != HAL_OK)
@@ -571,8 +578,9 @@ Module_Status Turn_ON(H_BridgeMode direction,Motor motor){
 
 	  }
 
- 	 MotorON();
+ 	 MotorON(motor);
 	 SetupMotor(direction,motor);
+//	 MotorPWM(H_Bridge_PWM_FREQ, 100,motor);
 
 	 return status;
 
@@ -598,6 +606,7 @@ Module_Status Turn_PWM(H_BridgeMode direction,uint8_t dutyCycle,Motor motor){
 
     Module_Status status=H18R1_OK;
 
+
     if( direction!= forward &&  direction!= backward)
          {
          	status= H18R1_ERR_WrongParams;
@@ -620,7 +629,7 @@ Module_Status Turn_PWM(H_BridgeMode direction,uint8_t dutyCycle,Motor motor){
 
 
 
-	MotorON();
+	MotorON(motor);
 	SetupMotor(direction,motor);
 	MotorPWM(H_Bridge_PWM_FREQ, dutyCycle,motor);
 

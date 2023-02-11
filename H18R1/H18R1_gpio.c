@@ -51,7 +51,7 @@ void H_Bridge_gpio_init(void){
 	   __HAL_RCC_GPIOB_CLK_ENABLE();
 
 	   /*Configure GPIO pin Output Level */
-	    HAL_GPIO_WritePin(GPIOA, ENB_Pin|IN4_Pin, GPIO_PIN_RESET);
+	    HAL_GPIO_WritePin(GPIOA, ENB_Pin|IN4_Pin|TIM14_CH1_IN3_Pin|TIM3_CH2_IN1_Pin, GPIO_PIN_RESET);
 
 	    /*Configure GPIO pin Output Level */
 	    HAL_GPIO_WritePin(GPIOB, ENA_Pin|IN2_Pin, GPIO_PIN_RESET);
@@ -90,62 +90,7 @@ void H_Bridge_gpio_init(void){
 
 }
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(htim->Instance==TIM3)
-  {
-  /* USER CODE BEGIN TIM3_MspPostInit 0 */
 
-  /* USER CODE END TIM3_MspPostInit 0 */
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**TIM3 GPIO Configuration
-    PA7     ------> TIM3_CH2
-    */
-    GPIO_InitStruct.Pin = TIM3_CH2_IN1_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF1_TIM3;
-    HAL_GPIO_Init(TIM3_CH2_IN1_GPIO_Port, &GPIO_InitStruct);
-
-    /* Peripheral interrupt init */
-    /* TIM3 interrupt Init */
-       HAL_NVIC_SetPriority(TIM3_TIM4_IRQn, 0, 0);
-       HAL_NVIC_EnableIRQ(TIM3_TIM4_IRQn);
-
-  /* USER CODE BEGIN TIM3_MspPostInit 1 */
-
-  /* USER CODE END TIM3_MspPostInit 1 */
-  }
-  else if(htim->Instance==TIM14)
-  {
-  /* USER CODE BEGIN TIM14_MspPostInit 0 */
-
-  /* USER CODE END TIM14_MspPostInit 0 */
-
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**TIM14 GPIO Configuration
-    PA4     ------> TIM14_CH1
-    */
-    GPIO_InitStruct.Pin = TIM14_CH1_IN3_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF4_TIM14;
-    HAL_GPIO_Init(TIM14_CH1_IN3_GPIO_Port, &GPIO_InitStruct);
-
-    /* Peripheral interrupt init */
-   	HAL_NVIC_SetPriority(TIM14_IRQn, 0, 0);
-   	HAL_NVIC_EnableIRQ(TIM14_IRQn);
-
-
-  /* USER CODE BEGIN TIM3_MspPostInit 1 */
-
-  /* USER CODE END TIM3_MspPostInit 1 */
-  }
-
-}
 /*-----------------------------------------------------------*/
 
 /* --- Check for factory reset condition: 
