@@ -60,27 +60,27 @@ void H_Bridge_gpio_init(void){
 	    GPIO_InitStruct.Pin = ENB_Pin|IN4_Pin;
 	    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	    GPIO_InitStruct.Pull = GPIO_NOPULL;
-	    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 	    /*Configure GPIO pins : ENA_Pin IN2_Pin */
 	    GPIO_InitStruct.Pin = ENA_Pin|IN2_Pin;
 	    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	    GPIO_InitStruct.Pull = GPIO_NOPULL;
-	    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 
 		GPIO_InitStruct.Pin = TIM3_CH2_IN1_Pin ;
 		GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
-		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 		HAL_GPIO_Init(TIM3_CH2_IN1_GPIO_Port, &GPIO_InitStruct);
 
 		GPIO_InitStruct.Pin = TIM14_CH1_IN3_Pin ;
 		GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
-		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 		HAL_GPIO_Init(TIM14_CH1_IN3_GPIO_Port, &GPIO_InitStruct);
 
 

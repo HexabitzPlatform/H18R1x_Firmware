@@ -158,6 +158,7 @@ extern UART_HandleTypeDef huart6;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim14;
 
+
 /* Define UART Init prototypes */
 extern void MX_USART1_UART_Init(void);
 extern void MX_USART2_UART_Init(void);
@@ -172,7 +173,7 @@ extern void ExecuteMonitor(void);
 extern Module_Status MotorON(Motor motor );
 extern Module_Status SetupMotor(H_BridgeMode MovementDirection, Motor motor);
 extern Module_Status MotorOFF(Motor motor);
-extern Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle,Motor motor);
+extern Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle,Motor motor,H_BridgeMode direction);
 /* -----------------------------------------------------------------------
  |								  APIs							          |  																 	|
 /* -----------------------------------------------------------------------

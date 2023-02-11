@@ -29,25 +29,10 @@ int main(void){
 /* User Task */
 void UserTask(void *argument){
 
-//Turn_ON(forward, MotorA);
-//Delay_ms(2000);
-//Turn_ON(backward, MotorB);
-////Delay_ms(2000);
-	Turn_PWM(backward, 80, MotorA);
-	Turn_PWM(backward, 80, MotorB);
+
 	// put your code here, to run repeatedly.
 	while(1){
-//		Turn_ON(forward, MotorB);
-//		Delay_ms(1000);
-//		Turn_OFF(MotorA);
-//		Delay_ms(10);
-//		Turn_ON(backward, MotorA);
-//		Turn_PWM(backward, 100, MotorA);
-//				Delay_ms(1000);
-//				Turn_OFF(MotorB);
-//				Delay_ms(10);
-//		Turn_ON(forward, MotorA);
-//		Delay_ms(1000);
+
 
 	}
 }

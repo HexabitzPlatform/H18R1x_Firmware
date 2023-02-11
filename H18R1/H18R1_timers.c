@@ -166,6 +166,8 @@ void MX_TIM14_Init(void)
 
 }
 
+/*----------------------------------------------------*/
+
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -187,8 +189,8 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 
     /* Peripheral interrupt init */
     /* TIM3 interrupt Init */
-       HAL_NVIC_SetPriority(TIM3_TIM4_IRQn, 0, 0);
-       HAL_NVIC_EnableIRQ(TIM3_TIM4_IRQn);
+//       HAL_NVIC_SetPriority(TIM3_TIM4_IRQn, 0, 0);
+//       HAL_NVIC_EnableIRQ(TIM3_TIM4_IRQn);
 
   /* USER CODE BEGIN TIM3_MspPostInit 1 */
 
@@ -211,9 +213,9 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
     GPIO_InitStruct.Alternate = GPIO_AF4_TIM14;
     HAL_GPIO_Init(TIM14_CH1_IN3_GPIO_Port, &GPIO_InitStruct);
 
-    /* Peripheral interrupt init */
-   	HAL_NVIC_SetPriority(TIM14_IRQn, 0, 0);
-   	HAL_NVIC_EnableIRQ(TIM14_IRQn);
+//    /* Peripheral interrupt init */
+//   	HAL_NVIC_SetPriority(TIM14_IRQn, 0, 0);
+//   	HAL_NVIC_EnableIRQ(TIM14_IRQn);
 
 
   /* USER CODE BEGIN TIM3_MspPostInit 1 */

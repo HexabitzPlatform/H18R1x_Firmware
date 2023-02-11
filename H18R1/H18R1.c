@@ -338,10 +338,10 @@ void Module_Peripheral_Init(void){
 
 
 	/*H_Bridge GPIO Init: */
-	H_Bridge_gpio_init();
-	MX_TIM3_Init();
-	MX_TIM14_Init();
 
+		H_Bridge_gpio_init();
+		MX_TIM3_Init();
+		MX_TIM14_Init();
 
 
 	/* Create module special task (if needed) */
@@ -454,8 +454,6 @@ Module_Status MotorON(Motor motor){
 	}
 
 
-
-
 	return status;
 
 }
@@ -477,6 +475,7 @@ Module_Status SetupMotor(H_BridgeMode MovementDirection, Motor motor){
 	else if(MovementDirection==backward && motor==MotorA){
 		HAL_GPIO_WritePin(TIM3_CH2_IN1_GPIO_Port ,TIM3_CH2_IN1_Pin ,GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_SET);
+
 	}
 	else if(MovementDirection==backward && motor==MotorB){
 		HAL_GPIO_WritePin(TIM14_CH1_IN3_GPIO_Port ,TIM14_CH1_IN3_Pin  ,GPIO_PIN_RESET);
@@ -488,7 +487,6 @@ Module_Status SetupMotor(H_BridgeMode MovementDirection, Motor motor){
 Module_Status MotorOFF(Motor motor){
 
 	Module_Status status=H18R1_OK;
-	H_Bridge_gpio_init();
 
 	if(motor==MotorA){
 		HAL_GPIO_WritePin(ENA_GPIO_Port ,ENA_Pin ,GPIO_PIN_RESET);
@@ -517,30 +515,35 @@ Module_Status PWM_stop(){
 /*-----------------------------------------------------------*/
 
 /* --- Set Motor PWM frequency and dutycycle ---*/
-Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle,Motor motor) {
+Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle,Motor motor,H_BridgeMode direction) {
 
 	Module_Status status=H18R1_OK;
+
 
 	uint32_t period = PWM_TIMER_CLOCK / freq;
 
 
+	if(direction==forward && motor==MotorA){
+		htim3.Instance->ARR = period - 1;
+		htim3.Instance->CCR2 = ((float) dutycycle / 100.0f) * period;
 
-	switch(motor){
-		case MotorA:
-			htim3.Instance->ARR = period - 1;
-			htim3.Instance->CCR2 = ((float) dutycycle / 100.0f) * period;
-			break;
-		case MotorB:
+		}
+		else if(direction==forward && motor==MotorB){
 			htim14.Instance->ARR = period - 1;
 			htim14.Instance->CCR1 = ((float) dutycycle / 100.0f) * period;
-			break;
 
-		default: break;
+		}
+		else if(direction==backward && motor==MotorA){
+			htim3.Instance->ARR = period - 1;
+			htim3.Instance->CCR2 = period- (((float) dutycycle / 100.0f) * period);
 
 
+		}
+		else if(direction==backward && motor==MotorB){
+			htim14.Instance->ARR = period - 1;
+			htim14.Instance->CCR1 = period- (((float) dutycycle / 100.0f) * period);
 
-	}
-
+		}
 
 
 	if (HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2 ) != HAL_OK)
@@ -563,7 +566,6 @@ Module_Status Turn_ON(H_BridgeMode direction,Motor motor){
      Module_Status status=H18R1_OK;
      H_Bridge_gpio_init();
 
-
      if( direction!= forward &&  direction!= backward)
      {
      	status= H18R1_ERR_WrongParams;
@@ -577,10 +579,10 @@ Module_Status Turn_ON(H_BridgeMode direction,Motor motor){
           	return status;
 
 	  }
-
+     PWM_stop();
  	 MotorON(motor);
 	 SetupMotor(direction,motor);
-//	 MotorPWM(H_Bridge_PWM_FREQ, 100,motor);
+
 
 	 return status;
 
@@ -595,6 +597,7 @@ Module_Status Turn_OFF(Motor motor){
 
 
     MotorOFF(motor);
+    PWM_stop();
 
 	return status;
 }
@@ -605,7 +608,6 @@ Module_Status Turn_OFF(Motor motor){
 Module_Status Turn_PWM(H_BridgeMode direction,uint8_t dutyCycle,Motor motor){
 
     Module_Status status=H18R1_OK;
-
 
     if( direction!= forward &&  direction!= backward)
          {
@@ -629,9 +631,11 @@ Module_Status Turn_PWM(H_BridgeMode direction,uint8_t dutyCycle,Motor motor){
 
 
 
+
+
 	MotorON(motor);
 	SetupMotor(direction,motor);
-	MotorPWM(H_Bridge_PWM_FREQ, dutyCycle,motor);
+	MotorPWM(H_Bridge_PWM_FREQ, dutyCycle,motor,direction);
 
 
 	return status;
