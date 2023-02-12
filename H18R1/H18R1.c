@@ -564,7 +564,7 @@ Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle,Motor motor,H_BridgeMode
 Module_Status Turn_ON(H_BridgeMode direction,Motor motor){
 
      Module_Status status=H18R1_OK;
-     H_Bridge_gpio_init();
+
 
      if( direction!= forward &&  direction!= backward)
      {
@@ -579,9 +579,11 @@ Module_Status Turn_ON(H_BridgeMode direction,Motor motor){
           	return status;
 
 	  }
-     PWM_stop();
+
  	 MotorON(motor);
 	 SetupMotor(direction,motor);
+	 MotorPWM(H_Bridge_PWM_FREQ, 100,motor,direction);
+
 
 
 	 return status;
