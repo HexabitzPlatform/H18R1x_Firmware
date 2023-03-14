@@ -297,7 +297,7 @@ void TIM3_TIM4_IRQHandler(void)
 
   /* USER CODE END TIM3_TIM4_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
-  HAL_TIM_IRQHandler(&htim14);
+
 
   /* USER CODE BEGIN TIM3_TIM4_IRQn 1 */
 

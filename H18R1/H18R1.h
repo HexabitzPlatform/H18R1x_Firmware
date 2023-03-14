@@ -9,8 +9,8 @@
 (Description of Special module peripheral configuration):
 
 >> USARTs 1,2,3,5,6 for module ports.
->> Timer3 (Ch2) & Timer14 (Ch1) for L298 PWM.
 
+>> Timer3 (Ch3) & Timer2 (Ch1) for L298 PWM.
  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -98,28 +98,23 @@
 #define NUM_MODULE_PARAMS						1
 
 /*  Pins For H_Bridge*/
-#define TIM3_CH2_IN1_Pin                      GPIO_PIN_7
-#define TIM3_CH2_IN1_GPIO_Port  			  GPIOA
+#define IN1_Pin                              GPIO_PIN_7
+#define IN1_GPIO_Port  		             	 GPIOA
 
-#define IN2_Pin                               GPIO_PIN_1
-#define IN2_GPIO_Port                         GPIOB
+#define IN2_Pin                              GPIO_PIN_1
+#define IN2_GPIO_Port                        GPIOB
 
-#define TIM14_CH1_IN3_Pin                     GPIO_PIN_4
-#define TIM14_CH1_IN3_GPIO_Port               GPIOA
+#define IN3_Pin                              GPIO_PIN_4
+#define IN3_GPIO_Port                        GPIOA
 
-#define IN4_Pin                               GPIO_PIN_6
-#define IN4_GPIO_Port                         GPIOA
+#define IN4_Pin                              GPIO_PIN_6
+#define IN4_GPIO_Port                        GPIOA
 
-#define ENB_Pin                               GPIO_PIN_5
-#define ENB_GPIO_Port                         GPIOA
+#define TIM2_CH1_ENB_Pin                     GPIO_PIN_5
+#define TIM2_CH1_ENB_GPIO_Port               GPIOA
 
-#define ENA_Pin                               GPIO_PIN_0
-#define ENA_GPIO_Port                         GPIOB
-
-
-#define PWM_TIMER_CLOCK							1000000
-#define H_Bridge_PWM_FREQ						10000
-
+#define TIM3_CH3_ENA_Pin                     GPIO_PIN_0
+#define TIM3_CH3_ENA_GPIO_Port               GPIOB
 
 /* Module EEPROM Variables */
 
@@ -131,13 +126,16 @@ typedef enum {
 	H18R1_OK =0,
 	H18R1_ERR_UnknownMessage,
 	H18R1_ERR_WrongParams,
+	H18R1_ERR_WrongDirection,
+    H18R1_ERR_WrongMotor,
+    H18R1_ERR_WrongDutyCycle,
 	H18R1_ERROR =255
 } Module_Status;
 
 typedef enum {
 	forward=1,
 	backward
-} H_BridgeMode;
+} H_BridgeDirection;
 
 typedef enum {
 	MotorA=1,
@@ -155,9 +153,9 @@ extern UART_HandleTypeDef huart5;
 extern UART_HandleTypeDef huart6;
 
 /*Timer for PWM*/
-extern TIM_HandleTypeDef htim3;
-extern TIM_HandleTypeDef htim14;
 
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
 
 /* Define UART Init prototypes */
 extern void MX_USART1_UART_Init(void);
@@ -170,17 +168,15 @@ extern void ExecuteMonitor(void);
 
 
 /*-----------------Private function------------------*/
-extern Module_Status MotorON(Motor motor );
-extern Module_Status SetupMotor(H_BridgeMode MovementDirection, Motor motor);
-extern Module_Status MotorOFF(Motor motor);
-extern Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle,Motor motor,H_BridgeMode direction);
+
+extern Module_Status MotorPWM( uint8_t dutycycle,Motor motor);
 /* -----------------------------------------------------------------------
  |								  APIs							          |  																 	|
 /* -----------------------------------------------------------------------
  */
-extern Module_Status Turn_ON(H_BridgeMode direction,Motor motor);
+extern Module_Status Turn_ON(H_BridgeDirection direction,Motor motor);
 extern Module_Status Turn_OFF(Motor motor);
-extern Module_Status Turn_PWM(H_BridgeMode direction,uint8_t dutyCycle,Motor motor);
+extern Module_Status Turn_PWM(H_BridgeDirection direction,uint8_t dutyCycle,Motor motor);
 
 void SetupPortForRemoteBootloaderUpdate(uint8_t port);
 void remoteBootloaderUpdate(uint8_t src,uint8_t dst,uint8_t inport,uint8_t outport);

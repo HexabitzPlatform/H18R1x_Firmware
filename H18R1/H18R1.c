@@ -9,7 +9,7 @@
 (Description of Special module peripheral configuration):
 
 >> USARTs 1,2,3,5,6 for module ports.
->> Timer3 (Ch2) & Timer14 (Ch1) for L298 PWM.
+>> Timer3 (Ch3) & Timer2 (Ch1) for L298 PWM.
 
  */
 
@@ -33,15 +33,21 @@ module_param_t modParam[NUM_MODULE_PARAMS] ={{.paramPtr = NULL, .paramFormat =FM
 /* Private variables ---------------------------------------------------------*/
 
 /*Timer for PWM*/
-TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim14;
 
+TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 
 
 /* Private function prototypes -----------------------------------------------*/
-void MX_TIM3_Init(void);
-void MX_TIM14_Init(void);
-void ExecuteMonitor(void);
+
+ void MX_TIM3_Init(void);
+ void MX_TIM2_Init(void);
+ void GPIO_MotorA_Init(void);
+ void GPIO_MotorB_Init(void);
+ Module_Status Turn_PWM(H_BridgeDirection direction,uint8_t dutyCycle,Motor motor);
+ void ExecuteMonitor(void);
+
+
 
 /* Create CLI commands --------------------------------------------------------*/
 portBASE_TYPE CLI_Turn_ONCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
@@ -52,7 +58,7 @@ portBASE_TYPE CLI_Turn_PWMCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen
 const CLI_Command_Definition_t CLI_Turn_ONCommandDefinition =
 {
 	( const int8_t * ) "turn_on", /* The command string to type. */
-	( const int8_t * ) "turn_on :\r\n Parameters required to execute a Turn_ON: Direction forward or backward and Motor on: MotorA or MotorB \r\n\r\n",
+	( const int8_t * ) "turn_on : Parameters required to execute a Turn_ON:\n\r 1)Direction: forward or backward\n\r 2)Motor on: MotorA or MotorB \n\r\n",
 	CLI_Turn_ONCommand, /* The function to run. */
 	2 /* two parameters are expected. */
 };
@@ -61,7 +67,7 @@ const CLI_Command_Definition_t CLI_Turn_ONCommandDefinition =
 const CLI_Command_Definition_t CLI_Turn_OFFCommandDefinition =
 {
 	( const int8_t * ) "turn_off", /* The command string to type. */
-	( const int8_t * ) "turn_off :\r\n Parameters required to execute a Turn_OFF: Motor off: MotorA or MotorB  \r\n\r\n",
+	( const int8_t * ) "turn_off :Parameters required to execute a Turn_OFF:\n\r 1)Motor off: MotorA or MotorB \n\r\n",
 	CLI_Turn_OFFCommand, /* The function to run. */
 	1 /* one parameters are expected. */
 };
@@ -70,8 +76,9 @@ const CLI_Command_Definition_t CLI_Turn_OFFCommandDefinition =
 const CLI_Command_Definition_t CLI_Turn_PWMCommandDefinition =
 {
 	( const int8_t * ) "turn_pwm", /* The command string to type. */
-	( const int8_t * ) "turn_pwm :\r\n Parameters required to execute a Turn_PWM: Direction forward or backward and"
-		" dutyCycle: PWM duty cycle in precentage (0 to 100) Motor on: MotorA or MotorB \r\n\r\n",
+	( const int8_t * ) "turn_pwm :Parameters required to execute a Turn_PWM:\n\r 1)Direction: forward or backward \n\r"
+		" 2)dutyCycle: PWM duty cycle in precentage (0 to 100)% \n\r"
+	    " 3)Motor on: MotorA or MotorB \n\r\n",
 		CLI_Turn_PWMCommand, /* The function to run. */
 	3 /* three parameters are expected. */
 };
@@ -87,7 +94,6 @@ const CLI_Command_Definition_t CLI_Turn_PWMCommandDefinition =
  *         The system Clock is configured as follow : 
  *            System Clock source            = PLL (HSE)
  *            SYSCLK(Hz)                     = 48000000
- *            HCLK(Hz)                       = 48000000
  *            AHB Prescaler                  = 1
  *            APB1 Prescaler                 = 1
  *            HSE Frequency(Hz)              = 8000000
@@ -338,12 +344,10 @@ void Module_Peripheral_Init(void){
 
 
 	/*H_Bridge GPIO Init: */
-
-		H_Bridge_gpio_init();
-		MX_TIM3_Init();
-		MX_TIM14_Init();
-
-
+	 GPIO_MotorA_Init();
+	 GPIO_MotorB_Init();
+	 MX_TIM3_Init();
+	 MX_TIM2_Init();
 	/* Create module special task (if needed) */
 }
 
@@ -418,7 +422,6 @@ void RegisterModuleCLICommands(void){
 
 /*-----------------------------------------------------------*/
 
-
 /* Module special task function (if needed) */
 //void Module_Special_Task(void *argument){
 //
@@ -440,207 +443,134 @@ void RegisterModuleCLICommands(void){
 //}
 
 
-/*-----------------------------------------------------------*/
-Module_Status MotorON(Motor motor){
 
-	Module_Status status=H18R1_OK;
-	if(motor==MotorA){
-		HAL_GPIO_WritePin(ENA_GPIO_Port ,ENA_Pin ,GPIO_PIN_SET);
-
+/* --- Set Motor PWM dutycycle ---*/
+Module_Status MotorPWM(uint8_t dutycycle,Motor motor)
+{
+	Module_Status  status=H18R1_OK;
+	uint32_t period =100;
+	switch(motor)
+	{
+			case MotorA:
+				status=H18R1_OK;
+				htim3.Instance->ARR = period - 1;
+				htim3.Instance->CCR3 = ((float) dutycycle / 100.0f) * period;
+				break;
+			case MotorB:
+				status=H18R1_OK;
+				htim2.Instance->ARR = period - 1;
+				htim2.Instance->CCR1 = ((float) dutycycle / 100.0f) * period;
+				break;
+			default:
+				status=H18R1_ERR_WrongMotor;
+				break;
 	}
-	else if(motor==MotorB){
-		HAL_GPIO_WritePin(ENB_GPIO_Port ,ENB_Pin ,GPIO_PIN_SET);
-
-	}
-
-
-	return status;
-
+		return status;
 }
-/*-----------------------------------------------------------*/
-Module_Status SetupMotor(H_BridgeMode MovementDirection, Motor motor){
 
-	Module_Status status=H18R1_OK;
-
-
-	if(MovementDirection==forward && motor==MotorA){
-		HAL_GPIO_WritePin(TIM3_CH2_IN1_GPIO_Port ,TIM3_CH2_IN1_Pin ,GPIO_PIN_SET);
-		HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_RESET);
-
-	}
-	else if(MovementDirection==forward && motor==MotorB){
-		HAL_GPIO_WritePin(TIM14_CH1_IN3_GPIO_Port ,TIM14_CH1_IN3_Pin ,GPIO_PIN_SET);
-		HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_RESET);
-	}
-	else if(MovementDirection==backward && motor==MotorA){
-		HAL_GPIO_WritePin(TIM3_CH2_IN1_GPIO_Port ,TIM3_CH2_IN1_Pin ,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_SET);
-
-	}
-	else if(MovementDirection==backward && motor==MotorB){
-		HAL_GPIO_WritePin(TIM14_CH1_IN3_GPIO_Port ,TIM14_CH1_IN3_Pin  ,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_SET);
-	}
-	return status;
-}
-/*-----------------------------------------------------------*/
-Module_Status MotorOFF(Motor motor){
-
-	Module_Status status=H18R1_OK;
-
-	if(motor==MotorA){
-		HAL_GPIO_WritePin(ENA_GPIO_Port ,ENA_Pin ,GPIO_PIN_RESET);
-	}
-
-	else if(motor==MotorB){
-	HAL_GPIO_WritePin(ENB_GPIO_Port ,ENB_Pin ,GPIO_PIN_RESET);
-	}
-
-	return status;
-
-}
-/*-----------------------------------------------------------*/
-Module_Status PWM_stop(){
-
-	Module_Status status=H18R1_OK;
-
-
-	HAL_TIM_PWM_Stop(&htim14, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
-
-	return status;
-
-
-}
-/*-----------------------------------------------------------*/
-
-/* --- Set Motor PWM frequency and dutycycle ---*/
-Module_Status MotorPWM(uint32_t freq, uint8_t dutycycle,Motor motor,H_BridgeMode direction) {
-
-	Module_Status status=H18R1_OK;
-
-
-	uint32_t period = PWM_TIMER_CLOCK / freq;
-
-
-	if(direction==forward && motor==MotorA){
-		htim3.Instance->ARR = period - 1;
-		htim3.Instance->CCR2 = ((float) dutycycle / 100.0f) * period;
-
-		}
-		else if(direction==forward && motor==MotorB){
-			htim14.Instance->ARR = period - 1;
-			htim14.Instance->CCR1 = ((float) dutycycle / 100.0f) * period;
-
-		}
-		else if(direction==backward && motor==MotorA){
-			htim3.Instance->ARR = period - 1;
-			htim3.Instance->CCR2 = period- (((float) dutycycle / 100.0f) * period);
-
-
-		}
-		else if(direction==backward && motor==MotorB){
-			htim14.Instance->ARR = period - 1;
-			htim14.Instance->CCR1 = period- (((float) dutycycle / 100.0f) * period);
-
-		}
-
-
-	if (HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2 ) != HAL_OK)
-		return H18R1_ERROR;
-	if (HAL_TIM_PWM_Start(&htim14,TIM_CHANNEL_1 ) != HAL_OK)
-		return H18R1_ERROR;
-
-	return status;
-}
 /*-----------------------------------------------------------*/
 
 /* -----------------------------------------------------------------------
  |								  APIs							          | 																 	|
 /* -----------------------------------------------------------------------
- */
+
 
 /*--------------Run the motor at full speed------------*/
-Module_Status Turn_ON(H_BridgeMode direction,Motor motor){
-
-     Module_Status status=H18R1_OK;
-
-
-     if( direction!= forward &&  direction!= backward)
-     {
-     	status= H18R1_ERR_WrongParams;
-     	return status;
-
-     }
-
-     if( motor!= MotorA && motor!= MotorB)
-	  {
-          	status= H18R1_ERR_WrongParams;
-          	return status;
-
-	  }
-
- 	 MotorON(motor);
-	 SetupMotor(direction,motor);
-	 MotorPWM(H_Bridge_PWM_FREQ, 100,motor,direction);
-
-
-
-	 return status;
-
+Module_Status Turn_ON(H_BridgeDirection direction,Motor motor)
+{
+	Module_Status status=H18R1_OK;
+	Turn_PWM(direction,100, motor);
+	return status;
 }
-
 /*-----------------------------------------------------------------------------*/
 
 /*------------------Off the motor---------------*/
-Module_Status Turn_OFF(Motor motor){
+Module_Status Turn_OFF(Motor motor)
+{
 
-    Module_Status status=H18R1_OK;
-
-
-    MotorOFF(motor);
-    PWM_stop();
-
+	Module_Status  status=H18R1_OK;
+	if(motor==MotorA)
+	    {
+		HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_3);
+		htim3.Instance->CCR3=0;
+			status=H18R1_OK;
+	    }
+	else if(motor==MotorB)
+	    {
+	   	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+	  	htim2.Instance->CCR1=0;
+		status=H18R1_OK;
+		}
+	else{
+		status=H18R1_ERR_WrongMotor;
+		}
 	return status;
 }
+
+
 /*-----------------------------------------------------------------------------*/
 /* --- Turn-on H_Bridge with pulse-width modulation (PWM) ---
  dutyCycle: PWM duty cycle in precentage (0 to 100)
  */
-Module_Status Turn_PWM(H_BridgeMode direction,uint8_t dutyCycle,Motor motor){
-
-    Module_Status status=H18R1_OK;
-
-    if( direction!= forward &&  direction!= backward)
-         {
-         	status= H18R1_ERR_WrongParams;
-         	return status;
-         }
-
-	 if( motor!= MotorA && motor!= MotorB)
-		  {
-			status= H18R1_ERR_WrongParams;
-			return status;
-
-		  }
-
-
-		if (dutyCycle < 0 || dutyCycle > 100)
+Module_Status Turn_PWM(H_BridgeDirection direction,uint8_t dutyCycle,Motor motor)
+{
+	Module_Status  status=H18R1_OK;
+	if (dutyCycle < 0 || dutyCycle > 100)
 		{
-			status= H18R1_ERR_WrongParams;
+		    status=  H18R1_ERR_WrongDutyCycle;
 			return status;
 		}
+	else if(motor== MotorA )
+	    {
+		   GPIO_MotorA_Init();
+	       MX_TIM3_Init();
+	       HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+			if( direction== forward)
+			{   HAL_GPIO_WritePin(IN1_GPIO_Port ,IN1_Pin ,GPIO_PIN_SET);
+			    HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_RESET);
+			    status=H18R1_OK;
+			}
+			else if ( direction== backward)
+			{
+			    HAL_GPIO_WritePin(IN1_GPIO_Port ,IN1_Pin ,GPIO_PIN_RESET);
+			    HAL_GPIO_WritePin(IN2_GPIO_Port ,IN2_Pin ,GPIO_PIN_SET);
+			    status=H18R1_OK;
+			}
+			else
+			{  status= H18R1_ERR_WrongDirection;
+			return status;
+			}
+	    }
+	 else if(motor== MotorB )
+		{
+		    GPIO_MotorB_Init();
+		    MX_TIM2_Init();
+		    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+			if(direction== forward)
+			{
+			    HAL_GPIO_WritePin(IN3_GPIO_Port ,IN3_Pin ,GPIO_PIN_SET);
+			    HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_RESET);
+			    status=H18R1_OK;
+			}
+		    else if (direction== backward)
+			{
+		     HAL_GPIO_WritePin(IN3_GPIO_Port ,IN3_Pin ,GPIO_PIN_RESET);
+			 HAL_GPIO_WritePin(IN4_GPIO_Port ,IN4_Pin ,GPIO_PIN_SET);
+			 status=H18R1_OK;
+			}
+			else
+			{   status= H18R1_ERR_WrongDirection;
+			return status;
+			}
+		}
+	   else
+	   {
+			status= H18R1_ERR_WrongMotor;
+			return status;
+	   }
 
-
-
-
-
-	MotorON(motor);
-	SetupMotor(direction,motor);
-	MotorPWM(H_Bridge_PWM_FREQ, dutyCycle,motor,direction);
-
-
-	return status;
+	     MotorPWM(dutyCycle,motor);
+	     return status;
 }
 
 /*-----------------------------------------------------------*/
@@ -653,7 +583,7 @@ Module_Status Turn_PWM(H_BridgeMode direction,uint8_t dutyCycle,Motor motor){
 portBASE_TYPE CLI_Turn_ONCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString ){
 	Module_Status status = H18R1_OK;
 
-	H_BridgeMode direction;
+	H_BridgeDirection direction;
 	Motor motor;
 
 	static int8_t *pcParameterString1;
@@ -663,15 +593,15 @@ portBASE_TYPE CLI_Turn_ONCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen,
 	portBASE_TYPE xParameterStringLength2 =0;
 
 
-	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is on \r\n  \n\r";
-	static const int8_t *pcWrongParamsMessage =(int8_t* )"Wrong Params!\n\r";
-
+	static const int8_t *pcOKMessage=(int8_t* )"The Motor %d is running in the direction %d \r\n  \n\r";
+	static const int8_t *pcWrongDirectionMessage =(int8_t* )"WrongDirection!\n\r";
+	static const int8_t *pcWrongMotorMessage =(int8_t* )"WrongMotor!\n\r";
 
 	(void )xWriteBufferLen;
 	configASSERT(pcWriteBuffer);
 
 	pcParameterString1 =(int8_t* )FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength1 );
-	direction =(H_BridgeMode )atol((char* )pcParameterString1);
+	direction =(H_BridgeDirection )atol((char* )pcParameterString1);
 
 	pcParameterString2 =(int8_t* )FreeRTOS_CLIGetParameter(pcCommandString, 2, &xParameterStringLength2 );
 	motor =(Motor )atol((char* )pcParameterString2);
@@ -681,14 +611,15 @@ portBASE_TYPE CLI_Turn_ONCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen,
 	status=Turn_ON(direction,motor);
 	if(status == H18R1_OK)
 	{
-		sprintf((char* )pcWriteBuffer,(char* )pcOKMessage,direction);
+		sprintf((char* )pcWriteBuffer,(char* )pcOKMessage,motor,direction);
 
 	}
 
-	else if(status == H18R1_ERR_WrongParams)
-		strcpy((char* )pcWriteBuffer,(char* )pcWrongParamsMessage);
+	else if(status == H18R1_ERR_WrongMotor)
+			strcpy((char* )pcWriteBuffer,(char* )pcWrongMotorMessage);
 
-
+	else if(status == H18R1_ERR_WrongDirection)
+			strcpy((char* )pcWriteBuffer,(char* )pcWrongDirectionMessage);
 
 	return pdFALSE;
 }
@@ -702,8 +633,8 @@ portBASE_TYPE CLI_Turn_OFFCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen
 	static int8_t *pcParameterString1;
 	portBASE_TYPE xParameterStringLength1 =0;
 
-	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is off \n\r";
-	static const int8_t *pcErrorsMessage =(int8_t* )"Error Params!\n\r";
+	static const int8_t *pcOKMessage=(int8_t* )"The Motor %d is off \n\r";
+	static const int8_t *pcWrongMotorMessage =(int8_t* )"WrongMotor!\n\r";
 
 		(void )xWriteBufferLen;
 		configASSERT(pcWriteBuffer);
@@ -715,12 +646,12 @@ portBASE_TYPE CLI_Turn_OFFCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen
 
 	 if(status == H18R1_OK)
 	 {
-			 sprintf((char* )pcWriteBuffer,(char* )pcOKMessage);
+			 sprintf((char* )pcWriteBuffer,(char* )pcOKMessage,motor);
 
 	 }
 
-	 else if(status == H18R1_ERROR)
-			strcpy((char* )pcWriteBuffer,(char* )pcErrorsMessage);
+	 else if(status == H18R1_ERR_WrongMotor)
+			strcpy((char* )pcWriteBuffer,(char* )pcWrongMotorMessage);
 
 
 	return pdFALSE;
@@ -730,7 +661,7 @@ portBASE_TYPE CLI_Turn_OFFCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen
 portBASE_TYPE CLI_Turn_PWMCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString ){
 	Module_Status status = H18R1_OK;
 
-	H_BridgeMode direction;
+	H_BridgeDirection direction;
 	uint8_t dutyCycle;
 	Motor motor;
 
@@ -742,14 +673,18 @@ portBASE_TYPE CLI_Turn_PWMCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen
 	portBASE_TYPE xParameterStringLength2 =0;
 	portBASE_TYPE xParameterStringLength3 =0;
 
-	static const int8_t *pcOKMessage=(int8_t* )"H_Bridge is on in mode PWM in duty cycle   %d percent \r\n";
-	static const int8_t *pcWrongParamsMessage =(int8_t* )"WrongParams!\n\r";
+	static const int8_t *pcOKMessage=(int8_t* )"The Motor %d is running  PWM in duty cycle %d percent and the direction %d  \r\n";
+	static const int8_t *pcWrongDutyCycleMessage =(int8_t* )"WrongDutyCycle!\n\r";
+	static const int8_t *pcWrongMotorMessage =(int8_t* )"WrongMotor!\n\r";
+	static const int8_t *pcWrongDirectionMessage =(int8_t* )"WrongDirection!\n\r";
+
+
 	(void )xWriteBufferLen;
 	configASSERT(pcWriteBuffer);
 
 
 	pcParameterString1 =(int8_t* )FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength1 );
-	direction =(H_BridgeMode )atol((char* )pcParameterString1);
+	direction =(H_BridgeDirection )atol((char* )pcParameterString1);
 
 	 pcParameterString2 =(int8_t* )FreeRTOS_CLIGetParameter(pcCommandString, 2, &xParameterStringLength2 );
 	 dutyCycle =(uint8_t )atol((char* )pcParameterString2);
@@ -761,14 +696,20 @@ portBASE_TYPE CLI_Turn_PWMCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen
 
 	 if(status == H18R1_OK)
 	 {
-		 sprintf((char* )pcWriteBuffer,(char* )pcOKMessage,direction,dutyCycle);
+		 sprintf((char* )pcWriteBuffer,(char* )pcOKMessage,motor,dutyCycle,direction);
 
 	 }
 
-	 else if(status == H18R1_ERR_WrongParams)
-	 {
-		strcpy((char* )pcWriteBuffer,(char* )pcWrongParamsMessage);
-	 }
+	 else if(status == H18R1_ERR_WrongDutyCycle)
+	 		 strcpy((char* )pcWriteBuffer,(char* )pcWrongDutyCycleMessage);
+
+	 else if(status == H18R1_ERR_WrongMotor)
+		 strcpy((char* )pcWriteBuffer,(char* )pcWrongMotorMessage);
+
+
+	 else if(status == H18R1_ERR_WrongDirection)
+	 		strcpy((char* )pcWriteBuffer,(char* )pcWrongDirectionMessage);
+
 
 
 	return pdFALSE;
