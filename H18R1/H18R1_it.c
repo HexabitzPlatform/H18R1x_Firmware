@@ -290,19 +290,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	HAL_UART_Receive_IT(huart,(uint8_t* )&Rx_Data[GetPort(huart) - 1] , 1);
 }
 
-/*-----------------------------------------------------------*/
-void TIM3_TIM4_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM3_TIM4_IRQn 0 */
 
-  /* USER CODE END TIM3_TIM4_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim3);
-
-
-  /* USER CODE BEGIN TIM3_TIM4_IRQn 1 */
-
-  /* USER CODE END TIM3_TIM4_IRQn 1 */
-}
 /*-----------------------------------------------------------*/
 
 /* Run time stack overflow checking is performed if
