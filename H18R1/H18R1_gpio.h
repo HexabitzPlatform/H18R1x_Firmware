@@ -21,6 +21,8 @@
 
 extern void GPIO_Init(void);
 extern void IND_LED_Init(void);
+extern void GPIO_MotorA_Init(void);
+extern void GPIO_MotorB_Init(void);
 
 #ifdef __cplusplus
 }

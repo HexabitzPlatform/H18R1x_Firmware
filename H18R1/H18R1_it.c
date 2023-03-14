@@ -9,6 +9,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "BOS.h"
+#include "H18R1.h"
 
 uint8_t temp_length[NumOfPorts] = {0};
 uint8_t temp_index[NumOfPorts] = {0};
@@ -289,7 +290,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	HAL_UART_Receive_IT(huart,(uint8_t* )&Rx_Data[GetPort(huart) - 1] , 1);
 }
 
-/*-----------------------------------------------------------*/
 
 /*-----------------------------------------------------------*/
 
