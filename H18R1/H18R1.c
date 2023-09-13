@@ -544,7 +544,7 @@ Module_Status Turn_PWM(H_BridgeDirection direction,uint8_t dutyCycle,Motor motor
 		}
 	else if(motor== MotorA )
 	    {
-		   GPIO_MotorA_Init();
+//		   GPIO_MotorA_Init();
 	       MX_TIM3_Init();
 	       HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 			if( direction== forward)
@@ -565,7 +565,7 @@ Module_Status Turn_PWM(H_BridgeDirection direction,uint8_t dutyCycle,Motor motor
 	    }
 	 else if(motor== MotorB )
 		{
-		    GPIO_MotorB_Init();
+//		    GPIO_MotorB_Init();
 		    MX_TIM2_Init();
 		    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 			if(direction== forward)
