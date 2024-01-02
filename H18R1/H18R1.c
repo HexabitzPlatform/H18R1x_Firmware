@@ -20,6 +20,7 @@
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
+UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart5;
 UART_HandleTypeDef huart6;
 
@@ -353,6 +354,23 @@ void Module_Peripheral_Init(void){
 	 MX_TIM3_Init();
 	 MX_TIM2_Init();
 	/* Create module special task (if needed) */
+
+	 //Circulating DMA Channels ON All Module
+	 for(int i=1;i<=NumOfPorts;i++)
+		{
+		  if(GetUart(i)==&huart1)
+				   { index_dma[i-1]=&(DMA1_Channel1->CNDTR); }
+		  else if(GetUart(i)==&huart2)
+				   { index_dma[i-1]=&(DMA1_Channel2->CNDTR); }
+		  else if(GetUart(i)==&huart3)
+				   { index_dma[i-1]=&(DMA1_Channel3->CNDTR); }
+		  else if(GetUart(i)==&huart4)
+				   { index_dma[i-1]=&(DMA1_Channel4->CNDTR); }
+		  else if(GetUart(i)==&huart5)
+				   { index_dma[i-1]=&(DMA1_Channel5->CNDTR); }
+		  else if(GetUart(i)==&huart6)
+				   { index_dma[i-1]=&(DMA1_Channel6->CNDTR); }
+		}
 }
 
 /*-----------------------------------------------------------*/
@@ -526,7 +544,7 @@ Module_Status Turn_PWM(H_BridgeDirection direction,uint8_t dutyCycle,Motor motor
 		}
 	else if(motor== MotorA )
 	    {
-		   GPIO_MotorA_Init();
+//		   GPIO_MotorA_Init();
 	       MX_TIM3_Init();
 	       HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 			if( direction== forward)
@@ -547,7 +565,7 @@ Module_Status Turn_PWM(H_BridgeDirection direction,uint8_t dutyCycle,Motor motor
 	    }
 	 else if(motor== MotorB )
 		{
-		    GPIO_MotorB_Init();
+//		    GPIO_MotorB_Init();
 		    MX_TIM2_Init();
 		    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 			if(direction== forward)
