@@ -1,0 +1,6 @@
+..\..\H18R1\H18R1_gpio.c:22:6:GPIO_Init	1
+..\..\H18R1\H18R1_gpio.c:34:6:IND_LED_Init	1
+..\..\H18R1\H18R1_gpio.c:45:7:GPIO_MotorA_Init	1
+..\..\H18R1\H18R1_gpio.c:75:6:GPIO_MotorB_Init	1
+..\..\H18R1\H18R1_gpio.c:106:9:IsFactoryReset	3
+..\..\H18R1\H18R1_gpio.c:157:12:GetPortGPIOs	6
