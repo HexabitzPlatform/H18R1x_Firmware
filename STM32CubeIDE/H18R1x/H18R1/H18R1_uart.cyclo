@@ -14,3 +14,4 @@
 ..\..\H18R1\H18R1_uart.c:562:6:SwapUartPins	4
 ..\..\H18R1\H18R1_uart.c:580:12:ReadPortsDir	5
 ..\..\H18R1\H18R1_uart.c:603:12:ReadPortsDirMSG	3
+..\..\H18R1\H18R1_uart.c:620:12:UpdateMyPortsDir	3
