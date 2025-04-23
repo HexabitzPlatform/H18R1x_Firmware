@@ -367,8 +367,7 @@ void SetupPortForRemoteBootloaderUpdate(uint8_t port){
 
 }
 
-/* --- H18R1 module initialization.
- */
+/* H18R1 module initialization */
 void Module_Peripheral_Init(void){
 
 	/* Array ports */
@@ -378,32 +377,35 @@ void Module_Peripheral_Init(void){
 	MX_USART5_UART_Init();
 	MX_USART6_UART_Init();
 
+	/* H_Bridge GPIO Init */
+	GPIO_MotorA_Init();
+	GPIO_MotorB_Init();
+	MX_TIM3_Init();
+	MX_TIM2_Init();
 
-
-	/*H_Bridge GPIO Init: */
-	 GPIO_MotorA_Init();
-	 GPIO_MotorB_Init();
-	 MX_TIM3_Init();
-	 MX_TIM2_Init();
-	/* Create module special task (if needed) */
-
-	 //Circulating DMA Channels ON All Module
-	 for(int i=1;i<=NumOfPorts;i++)
-		{
-		  if(GetUart(i)==&huart1)
-				   { index_dma[i-1]=&(DMA1_Channel1->CNDTR); }
-		  else if(GetUart(i)==&huart2)
-				   { index_dma[i-1]=&(DMA1_Channel2->CNDTR); }
-		  else if(GetUart(i)==&huart3)
-				   { index_dma[i-1]=&(DMA1_Channel3->CNDTR); }
-		  else if(GetUart(i)==&huart4)
-				   { index_dma[i-1]=&(DMA1_Channel4->CNDTR); }
-		  else if(GetUart(i)==&huart5)
-				   { index_dma[i-1]=&(DMA1_Channel5->CNDTR); }
-		  else if(GetUart(i)==&huart6)
-				   { index_dma[i-1]=&(DMA1_Channel6->CNDTR); }
+	/* Circulating DMA Channels ON All Module */
+	for(int i =1; i <= NUM_OF_PORTS; i++){
+		if(GetUart(i) == &huart1){
+			dmaIndex[i - 1] =&(DMA1_Channel1->CNDTR);
 		}
+		else if(GetUart(i) == &huart2){
+			dmaIndex[i - 1] =&(DMA1_Channel2->CNDTR);
+		}
+		else if(GetUart(i) == &huart3){
+			dmaIndex[i - 1] =&(DMA1_Channel3->CNDTR);
+		}
+		else if(GetUart(i) == &huart4){
+			dmaIndex[i - 1] =&(DMA1_Channel4->CNDTR);
+		}
+		else if(GetUart(i) == &huart5){
+			dmaIndex[i - 1] =&(DMA1_Channel5->CNDTR);
+		}
+		else if(GetUart(i) == &huart6){
+			dmaIndex[i - 1] =&(DMA1_Channel6->CNDTR);
+		}
+	}
 }
+
 /***************************************************************************/
 /* This functions is useful only for input (sensors) modules.
  * @brief: Samples a module parameter value based on parameter index.
@@ -493,30 +495,6 @@ void RegisterModuleCLICommands(void){
 
 
 }
-
-/*-----------------------------------------------------------*/
-
-/* Module special task function (if needed) */
-//void Module_Special_Task(void *argument){
-//
-//	/* Infinite loop */
-//	uint8_t cases; // Test variable.
-//	for(;;){
-//		/*  */
-//		switch(cases){
-//
-//
-//			default:
-//				osDelay(10);
-//				break;
-//		}
-//
-//		taskYIELD();
-//	}
-//
-//}
-
-
 
 /* --- Set Motor PWM dutycycle ---*/
 Module_Status MotorPWM(uint8_t dutycycle,Motor motor)
@@ -646,8 +624,6 @@ Module_Status Turn_PWM(H_BridgeDirection direction,uint8_t dutyCycle,Motor motor
 	     MotorPWM(dutyCycle,motor);
 	     return status;
 }
-
-/*-----------------------------------------------------------*/
 
 
 /* -----------------------------------------------------------------------
@@ -790,9 +766,5 @@ portBASE_TYPE CLI_Turn_PWMCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen
 
 }
 
-/* ----------------------------------------------------------------------------*/
-
-
-/*-----------------------------------------------------------*/
-
-/************************ (C) COPYRIGHT HEXABITZ *****END OF FILE****/
+/***************************************************************************/
+/***************** (C) COPYRIGHT HEXABITZ ***** END OF FILE ****************/
