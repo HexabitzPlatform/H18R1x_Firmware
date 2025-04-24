@@ -131,12 +131,12 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim){
 		/**TIM2 GPIO Configuration
 		 PA5     ------> TIM2_CH1
 		 */
-		GPIO_InitStruct.Pin = TIM2_CH1_ENB_Pin;
+		GPIO_InitStruct.Pin = MOTOR_B_PWM_PIN;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 		GPIO_InitStruct.Alternate = GPIO_AF2_TIM2;
-		HAL_GPIO_Init(TIM2_CH1_ENB_GPIO_Port,&GPIO_InitStruct);
+		HAL_GPIO_Init(MOTOR_B_PWM_PORT,&GPIO_InitStruct);
 
 	}
 	else if(htim->Instance == TIM3){
@@ -144,12 +144,12 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim){
 		/**TIM3 GPIO Configuration
 		 PB0     ------> TIM3_CH3
 		 */
-		GPIO_InitStruct.Pin = TIM3_CH3_ENA_Pin;
+		GPIO_InitStruct.Pin = MOTOR_A_PWM_PIN;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 		GPIO_InitStruct.Alternate = GPIO_AF1_TIM3;
-		HAL_GPIO_Init(TIM3_CH3_ENA_GPIO_Port,&GPIO_InitStruct);
+		HAL_GPIO_Init(MOTOR_A_PWM_PORT,&GPIO_InitStruct);
 
 	}
 }

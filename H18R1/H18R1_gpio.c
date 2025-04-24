@@ -49,23 +49,23 @@ void GPIO_MotorA_Init(void){
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOA,IN1_Pin,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(MOTOR_A_IN1_PORT,MOTOR_A_IN1_PIN,GPIO_PIN_RESET);
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOB,IN2_Pin,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(MOTOR_A_IN2_PORT,MOTOR_A_IN2_PIN,GPIO_PIN_RESET);
 
 	/*Configure GPIO pins : TIM3_CH2_IN1_Pin */
-	GPIO_InitStruct.Pin = IN1_Pin;
+	GPIO_InitStruct.Pin = MOTOR_A_IN1_PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(IN1_GPIO_Port,&GPIO_InitStruct);
+	HAL_GPIO_Init(MOTOR_A_IN1_PORT,&GPIO_InitStruct);
 
 	/*Configure GPIO pins : ENA_Pin IN2_Pin */
-	GPIO_InitStruct.Pin = IN2_Pin;
+	GPIO_InitStruct.Pin = MOTOR_A_IN2_PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(GPIOB,&GPIO_InitStruct);
+	HAL_GPIO_Init(MOTOR_A_IN2_PORT,&GPIO_InitStruct);
 
 }
 
@@ -79,20 +79,20 @@ void GPIO_MotorB_Init(void){
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOA,IN4_Pin | IN3_Pin,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(MOTOR_B_IN3_PORT,MOTOR_B_IN4_PIN | MOTOR_B_IN3_PIN,GPIO_PIN_RESET);
 	/*Configure GPIO pins : TIM14_CH1_IN3_Pin */
-	GPIO_InitStruct.Pin = IN3_Pin;
+	GPIO_InitStruct.Pin = MOTOR_B_IN3_PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(IN3_GPIO_Port,&GPIO_InitStruct);
+	HAL_GPIO_Init(MOTOR_B_IN3_PORT,&GPIO_InitStruct);
 
 	/*Configure GPIO pins : ENB_Pin IN4_Pin */
-	GPIO_InitStruct.Pin = IN4_Pin;
+	GPIO_InitStruct.Pin = MOTOR_B_IN4_PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(GPIOA,&GPIO_InitStruct);
+	HAL_GPIO_Init(MOTOR_B_IN3_PORT,&GPIO_InitStruct);
 
 }
 

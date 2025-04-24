@@ -1,5 +1,5 @@
 /*
- BitzOS (BOS) V0.3.6 - Copyright (C) 2017-2024 Hexabitz
+ BitzOS (BOS) V0.4.0 - Copyright (C) 2017-2025 Hexabitz
  All rights reserved
  
  File Name     : H18R1.h
@@ -92,31 +92,38 @@
 #define	USART6_RX_PORT		GPIOB
 #define	USART6_AF			GPIO_AF8_USART6
 
-/* Timer Pin Definition */
-#define IN1_Pin                    GPIO_PIN_7
-#define IN1_GPIO_Port  		       GPIOA
+/* Motor A/B Timer Definitions */
+#define MOTOR_A_PWM_PIN        GPIO_PIN_0
+#define MOTOR_A_PWM_PORT       GPIOB
+#define MOTOR_A_TIM_HANDLE     &htim3
+#define MOTOR_A_TIM_CH         TIM_CHANNEL_3
+#define MOTOR_A_ARR            htim3.Instance->ARR
+#define MOTOR_A_CCR            htim3.Instance->CCR3
 
-#define IN2_Pin                    GPIO_PIN_1
-#define IN2_GPIO_Port              GPIOB
+#define MOTOR_B_PWM_PIN        GPIO_PIN_5
+#define MOTOR_B_PWM_PORT       GPIOA
+#define MOTOR_B_TIM_HANDLE     &htim2
+#define MOTOR_B_TIM_CH         TIM_CHANNEL_1
+#define MOTOR_B_ARR            htim2.Instance->ARR
+#define MOTOR_B_CCR            htim2.Instance->CCR1
 
-#define IN3_Pin                    GPIO_PIN_4
-#define IN3_GPIO_Port              GPIOA
+/* Motor A/B Direction GPIO Pins */
+#define MOTOR_A_IN1_PIN        GPIO_PIN_7
+#define MOTOR_A_IN1_PORT  	   GPIOA
+#define MOTOR_A_IN2_PIN        GPIO_PIN_1
+#define MOTOR_A_IN2_PORT       GPIOB
 
-#define IN4_Pin                    GPIO_PIN_6
-#define IN4_GPIO_Port              GPIOA
-
-#define TIM2_CH1_ENB_Pin           GPIO_PIN_5
-#define TIM2_CH1_ENB_GPIO_Port     GPIOA
-
-#define TIM3_CH3_ENA_Pin           GPIO_PIN_0
-#define TIM3_CH3_ENA_GPIO_Port     GPIOB
+#define MOTOR_B_IN3_PIN        GPIO_PIN_4
+#define MOTOR_B_IN3_PORT       GPIOA
+#define MOTOR_B_IN4_PIN        GPIO_PIN_6
+#define MOTOR_B_IN4_PORT       GPIOA
 
 /* Indicator LED */
-#define _IND_LED_PORT			   GPIOB
-#define _IND_LED_PIN		       GPIO_PIN_7
+#define _IND_LED_PORT		   GPIOB
+#define _IND_LED_PIN		   GPIO_PIN_7
 
 /* Module-specific Macro Definitions ***************************************/
-#define NUM_MODULE_PARAMS					1
+#define NUM_MODULE_PARAMS	   1
 
 /* Module_Status Type Definition */
 typedef enum {
@@ -129,11 +136,13 @@ typedef enum {
 	H18R1_ERROR =255
 } Module_Status;
 
+/* Motor Direction */
 typedef enum {
 	FORWARD_DIR=1,
 	BACKWARD_DIR
 } H_BridgeDirection;
 
+/* Motor Selection */
 typedef enum {
 	MOTOR_A=1,
 	MOTOR_B
@@ -158,10 +167,9 @@ extern void SystemClock_Config(void);
 /***************************************************************************/
 /***************************** General Functions ***************************/
 /***************************************************************************/
-Module_Status Turn_OFF(Motor motor);
-Module_Status Turn_ON(H_BridgeDirection direction,Motor motor);
-Module_Status Turn_PWM(H_BridgeDirection direction,uint8_t dutyCycle,Motor motor);
-
+Module_Status MotorTurnOff(Motor motor);
+Module_Status MotorTurnOn(H_BridgeDirection direction,Motor motor);
+Module_Status MotorSpeedControl(H_BridgeDirection direction,uint8_t dutyCycle,Motor motor);
 
 #endif /* H18R1_H */
 
