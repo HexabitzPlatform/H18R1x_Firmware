@@ -23,14 +23,34 @@ int main(void){
 }
 
 /*-----------------------------------------------------------*/
+/* Global variables */
+Motor motor;
+Module_Status motorTurnOff_Status;
+H_BridgeDirection direction;
+Module_Status motorTurnOn_Status;
+uint8_t dutyCycle;
+Module_Status motorSpeedControl_Status;
+
+/*-----------------------------------------------------------*/
 
 /* User Task */
 void UserTask(void *argument){
 
-	// put your code here, to run repeatedly.
-	while(1){
+  // put your code here, to run repeatedly.
 
-	}
+
+    while (1) {
+//    	motorTurnOff_Status = MotorTurnOff(MOTOR_B);
+//    	HAL_Delay(2222);
+//    	motorTurnOn_Status = MotorTurnOn(2, MOTOR_B);
+    	HAL_Delay(2222);
+    	motorSpeedControl_Status = MotorSpeedControl(2, 20, MOTOR_B);
+    	    	HAL_Delay(2222);
+    	    	motorSpeedControl_Status = MotorSpeedControl(2, 70, MOTOR_B);
+
+    	    	    	HAL_Delay(2222);
+    	    	    	motorSpeedControl_Status = MotorSpeedControl(2, 99, MOTOR_B);
+
+  }
 }
-
 /*-----------------------------------------------------------*/
