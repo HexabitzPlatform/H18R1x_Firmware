@@ -547,18 +547,18 @@ Module_Status Module_MessagingTask(uint16_t code,uint8_t port,uint8_t src,uint8_
 	uint8_t direction =0;
 
 	switch(code){
-		case CODE_H18R1_Turn_ON:
+		case CODE_H18R1_TURN_ON:
 			direction =(uint8_t )cMessage[port - 1][shift];
 			Motor =(uint8_t )cMessage[port - 1][1 + shift];
 			MotorTurnOn(direction,Motor);
 			break;
 
-		case CODE_H18R1_Turn_OFF:
+		case CODE_H18R1_TURN_OFF:
 			Motor =(uint8_t )cMessage[port - 1][shift];
 			MotorTurnOff(Motor);
 			break;
 
-		case CODE_H18R1_Turn_PWM:
+		case CODE_H18R1_TURN_PWM:
 			direction =(uint8_t )cMessage[port - 1][shift];
 			dutyCycle =(uint8_t )cMessage[port - 1][1 + shift];
 			Motor =(uint8_t )cMessage[port - 1][2 + shift];
