@@ -1,9 +1,15 @@
- /*
+/*
  BitzOS (BOS) V0.4.0 - Copyright (C) 2017-2025 Hexabitz
  All rights reserved
 
- File Name     : H18R1_eeprom.h
- Description   : EEPROM emulator library (Header file).
+ File Name  : H18R1_eeprom.h
+ Description: EEPROM emulation library header.
+ Organization: 1000 16-bit variables in 8 Flash pages (dual-group swapping).
+ Address Space:
+   - BOS (1-499)
+   - Module (500-599)
+   - User (600-1000)
+ Structure: 64-bit elements (32b data, 16b CRC, 16b address).
 
  * EEPROM Emulation Description:
  * -----------------------------

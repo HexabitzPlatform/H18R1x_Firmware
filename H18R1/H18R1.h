@@ -1,17 +1,12 @@
 /*
  BitzOS (BOS) V0.4.0 - Copyright (C) 2017-2025 Hexabitz
  All rights reserved
- 
- File Name     : H18R1.h
- Description   : Header file for module H18R1.
- 	 	 	 	 (Description_of_module)
 
-(Description of Special module peripheral configuration):
-
->> USARTs 1,2,3,5,6 for module ports.
-
->> Timer3 (Ch3) & Timer2 (Ch1) for L298 PWM.
- */
+ File Name  : H18R1.h
+ Description: H18R1 motor driver definitions.
+ Components: UART ports, PWM timers, H-Bridge GPIO.
+ Functions: Motor control interfaces and constants.
+*/
 
 /* Define to prevent recursive inclusion ***********************************/
 #ifndef H18R1_H

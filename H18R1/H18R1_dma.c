@@ -2,10 +2,12 @@
  BitzOS (BOS) V0.4.0 - Copyright (C) 2017-2025 Hexabitz
  All rights reserved
 
- File Name     : H18R1_dma.c
- Description   : source file Contains Peripheral DMA setup .
-
- */
+ File Name  : H18R1_dma.c
+ Description: DMA configuration and management for UART communications.
+ DMA: Initialization, messaging/streaming mode setup and switching.
+ CRC: 8-bit calculation for message validation.
+ UART: DMA-based reception for all ports (P1-P6).
+*/
 
 /* Includes ****************************************************************/
 #include "BOS.h"

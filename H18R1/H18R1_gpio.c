@@ -2,10 +2,12 @@
  BitzOS (BOS) V0.4.0 - Copyright (C) 2017-2025 Hexabitz
  All rights reserved
 
- File Name     : H18R1_gpio.c
- Description   : Source code provides code for the configuration of all used GPIO pins .
-
- */
+ File Name  : H18R1_gpio.c
+ Description: GPIO configuration for motor control and system functions.
+ GPIO: Initializes ports A,B,C,D,F and indicator LED.
+ Motors: Configures H-Bridge pins for MotorA/B (IN1-IN4).
+ System: Implements factory reset detection.
+*/
 
 /* Includes ****************************************************************/
 #include "BOS.h"

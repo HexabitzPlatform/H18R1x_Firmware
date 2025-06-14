@@ -2,10 +2,11 @@
  BitzOS (BOS) V0.4.0 - Copyright (C) 2017-2025 Hexabitz
  All rights reserved
 
- File Name     : H18R1_rtc.c
- Description   : Peripheral RTC setup source file.
-
- */
+ File Name  : H18R1_rtc.c
+ Description: Real-Time Clock configuration for H18R1.
+ RTC: 24/12-hour format, calendar setup, time/date management.
+ System: Power-on/reset status detection, backup register handling.
+*/
 
 /* Includes ****************************************************************/
 #include "BOS.h"

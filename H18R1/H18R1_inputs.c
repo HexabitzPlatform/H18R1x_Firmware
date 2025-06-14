@@ -2,10 +2,11 @@
  BitzOS (BOS) V0.4.0 - Copyright (C) 2017-2025 Hexabitz
  All rights reserved
 
- File Name     : H18R1_inputs.c
- Description   : Source code for Bitz digital and analog inputs.
-
- */
+ File Name  : H18R1_inputs.c
+ Description: Digital and analog input management for H18R1.
+ Buttons: Debounce, click detection, and event handling.
+ ADC: Port configuration, temperature/Vref readings, percentage calculation.
+*/
 
 /* Includes ****************************************************************/
 #include "H18R1_inputs.h"
