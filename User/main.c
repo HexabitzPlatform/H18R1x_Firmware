@@ -34,21 +34,9 @@ int main(void){
 /***************************************************************************/
 /* User Task */
 void UserTask(void *argument){
-	 ADCSelectPort(P2);
-	 ADCSelectPort(P3);
+
 	/* put your code here, to run repeatedly. */
-	while(1){
-			ReadADCChannel(P3, TOP, &adcValue1);
-			ReadADCChannel(P3, BOTTOM, &adcValue2);
-			ReadADCChannel(P2, TOP, &adcValue3);
-			ReadADCChannel(P2, BOTTOM, &adcValue4);
-
-			GetReadPercentage(P3, TOP, &percentageAdcValue1);
-			GetReadPercentage(P3, BOTTOM, &percentageAdcValue2);
-			GetReadPercentage(P2, TOP, &percentageAdcValue3);
-			GetReadPercentage(P2, BOTTOM, &percentageAdcValue4);
-
-}
+	while(1){}
 }
 
 /***************************************************************************/
